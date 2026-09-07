@@ -1,0 +1,90 @@
+'use client';
+import { useState } from 'react';
+import { say } from '../lib/toast';
+
+export default function Gate({ onEnter }) {
+  const [code, setCode] = useState('');
+  const [appOpen, setAppOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [approved, setApproved] = useState(false);
+  const [door, setDoor] = useState(false);
+
+  function knock(e) {
+    e.preventDefault();
+    if (code.trim().length >= 4) { setDoor(true); setTimeout(() => onEnter('Misafir'), 1950); }
+    else say('<b>Dürtü:</b> bu kod kapıyı açmadı. Davetin yoksa başvuru seni bekliyor.');
+  }
+
+  async function submitApp(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const name = (fd.get('name') || '').toString().trim() || 'Misafir';
+    const why = (fd.get('why') || '').toString().trim();
+    if (why.length < 12) { say('<b>Dürtü:</b> Üç cümle bekliyoruz — içtenlikle yaz.'); return; }
+    setBusy(true);
+    try {
+      await fetch('/api/apply', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, why, type: fd.get('type'), budget: fd.get('budget') }),
+      });
+    } catch (_) { /* demo: çevrimdışıysa da akış sürsün */ }
+    setTimeout(() => { setBusy(false); setApproved(true); }, 2200);
+    setTimeout(() => { setDoor(true); setTimeout(() => onEnter(name), 1800); }, 3400);
+  }
+
+  return (
+    <>
+      <section className="gate">
+        <span className="tag gate-tag">K a p a l ı &nbsp; K u l ü p</span>
+        <div className="wm">DÜRTÜ</div>
+        <div className="gate-rule" />
+        <p className="gate-sub">“Dürtü seni çağırıyor.”</p>
+        <p className="gate-hint" style={{ letterSpacing: '.14em' }}>Seçilmişler için · Giriş yalnızca davetle</p>
+        <form className="gate-form" onSubmit={knock}>
+          <input className="inp" style={{ textAlign: 'center', letterSpacing: '.3em' }} maxLength={12}
+            placeholder="DAVET KODU" value={code} onChange={e => setCode(e.target.value)} />
+          <button className="btn solid" type="submit">Kapıyı Çal</button>
+          <button className="btn ghost" type="button" onClick={() => setAppOpen(true)}>Başvuru Yap</button>
+          <p className="gate-hint">Demo: 4+ karakterli her kod kapıyı açar — örn. <b style={{ color: 'var(--gold)' }}>EV-2026</b></p>
+        </form>
+        <p className="gate-foot">İki adımlı doğrulama • Şifreli iletişim • 18+ | Sorumlu oyun</p>
+      </section>
+
+      {door && (
+        <div className="door"><span className="tag">Kapı aralanıyor</span><div className="door-line" /></div>
+      )}
+
+      {appOpen && (
+        <div className="ovl" onClick={e => e.target === e.currentTarget && setAppOpen(false)}>
+          <div className="pnl">
+            <button className="close" onClick={() => setAppOpen(false)}>✕</button>
+            <span className="tag">Üyelik Başvurusu</span>
+            <h3>Kayıt değil. Başvuru.</h3>
+            <p className="noteline">Her üyelik Dürtü tarafından tek tek değerlendirilir. Acele etme; içtenlikle yaz.</p>
+            {!approved ? (
+              <form onSubmit={submitApp}>
+                <label>Adın</label>
+                <input className="inp" name="name" placeholder="Adınız" />
+                <label>Neden DÜRTÜ'ye katılmak istiyorsun? (3 cümle)</label>
+                <textarea className="inp" name="why" placeholder="Seni buraya çeken nedir?" />
+                <label>Hangi türde kendini uzman hissediyorsun?</label>
+                <select className="inp" name="type"><option>Slot</option><option>Canlı Bahis</option><option>Masa Oyunları</option><option>Crash</option></select>
+                <label>Aylık oyun bütçen</label>
+                <select className="inp" name="budget"><option>5.000 TL altı</option><option>5.000 – 25.000 TL</option><option>25.000 – 100.000 TL</option><option>100.000 TL üzeri</option></select>
+                <div style={{ marginTop: '1.4rem' }}>
+                  <button className="btn solid" style={{ width: '100%' }} disabled={busy}>
+                    {busy ? 'Değerlendiriliyor…' : 'Başvuruyu Gönder'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <p className="noteline serif" style={{ border: 'none', padding: 0, textAlign: 'center', color: 'var(--gold)', fontSize: '1.05rem' }}>
+                ✦ Onaylandın. Davetiyen hazır…
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

@@ -1,0 +1,16 @@
+{
+  "name": "durtu-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DÜRTÜ — kapalı kulüp konsepti · Next.js portu",
+  "scripts": {
+    "dev": "next dev -p 3000 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 3000 -H 0.0.0.0"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}
