@@ -927,6 +927,7 @@ body.tick footer{padding-bottom:34px}
       <div class="hud-box"><small>BAHİS</small><select id="slotBet" class="hud-sel"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
       <div class="hud-box win-hud" id="winHud"><small>KAZANÇ</small><b id="winAmt">0</b></div>
       <button class="btn solid spin-btn" id="spinBtn" onclick="slotSpin()">DÖNDÜR</button>
+      <button class="btn spin-btn" id="buyBtn" onclick="buyBonus()" title="Bahsin ×100'ü karşılığında 8 ücretsiz dönüş + biriken çarpan garantisi">⚡ BONUS <span id="buyCost" style="display:block;font-size:.6rem;opacity:.7;margin-top:.15rem">×100 = ◈ 2.500</span></button>
     </div>
     <div class="slot-foot">
       <span class="muted" id="slotMsg">10 çizgi · ✦ Wild hepsinin yerine geçer · ✨ 3+ Scatter = 8 ücretsiz dönüş (×2)</span>
@@ -1823,6 +1824,27 @@ function loop(t){
 }
 
 /* --- döndürme --- */
+function buyCostNow(){ const b = +($('slotBet') ? $('slotBet').value : 25); return b * 100; }
+function renderBuyCost(){
+  const el = $('buyCost'); if(el) el.textContent = '×100 = ◈ ' + fmt(buyCostNow());
+}
+function buyBonus(){
+  if(!SL.open || SL.spinning) return;
+  const cost = buyCostNow(), name = SL.gname || 'Slot';
+  if(SL.fsPool > 0){ toast('Zaten ücretsiz dönüştesin — bitir, sonra düşünürüz.'); return; }
+  if(state.chips < cost){ toast('Bonus için ◈ ' + fmt(cost) + ' dürTL lazım. Bakiye: ◈ ' + fmt(state.chips)); return; }
+  state.chips -= cost; renderChips();
+  st().wagered += cost;
+  logRound(name + ' · Bonus Satın Al', cost, 0, null);
+  if(typeof vaultWageringTick === 'function') vaultWageringTick(cost);
+  SL.fsAcc = 0; SL.fsPool += 8; SL.fsMul = 2;
+  sfxScatter(); buzz([30, 40, 30, 40, 80]);
+  toast('⚡ <b>Bonus satın alındı:</b> 8 ücretsiz dönüş, biriken çarpanla. Bol şans, ' + esc(state.name) + '.');
+  updateFsBanner();
+  $('spinBtn').disabled = true;
+  setTimeout(() => { if(SL.open && !SL.spinning) slotSpin(); }, 650);
+  saveDemo();
+}
 function slotSpin(){
   if(!SL.open || SL.spinning) return;
   const bet = +$('slotBet').value;
@@ -1989,9 +2011,12 @@ function openSlot(id){
   SL.fsAcc = 0; SL.orbs = []; SL.feat = FEATS[g.id] || FEATS.gates; SL.flashT = 9;
   SL.winTarget = 0; SL.winShown = 0;
   $('slotTitle').textContent = g.icon + ' ' + g.name;
+  if(!$('slotBet').onchange) $('slotBet').onchange = renderBuyCost;
+  renderBuyCost();
   $('slotNote').textContent = '“' + g.note + '”';
   $('winAmt').textContent = '0';
   $('spinBtn').disabled = false;
+  $('buyBtn').disabled = false;
   buildPaytable();
   openOvl('ovlSlot');
   renderAngelInto('slot');
@@ -3377,6 +3402,7 @@ function logRound(game, bet, win, mul){
   st().hist.unshift({ ts: Date.now(), game, bet, win, mul: mul || null });
   if(st().hist.length > 80) st().hist.length = 80;
   if(win > 0 && typeof tickPush === 'function') tickPush(state.name, game, win, mul, true);
+  if(typeof selinObserve === 'function') selinObserve(win, game);
 }
 
 /* ================= CANLI KAZANÇ ŞERİDİ ================= */
@@ -3413,6 +3439,26 @@ function tickerStart(){
   for(let i = 0; i < 10; i++) tickGen();
   tickRender();
   tickIv = setInterval(tickRender, 9000);
+}
+
+/* ================= SELİN'İN SESİ (proaktif concierge) ================= */
+const SELIN_MSG = {
+  streak4: g => '💬 Selin: "“' + g + '” tarafında 4 eldir şansın yok, ' + '{name}' + '. İstersen nefeslenelim — ya da cazı açıp Sweet Bonanza’ya geçelim."',
+  streak7: g => '💬 Selin: "' + '{name}' + ', yedi turdur kazanın yok. Ara vermek zayıflık değil, disiplindir. Rapordan bakmak ister misin?"'
+};
+let _selinT = 0;
+function selinObserve(win, game){
+  const hist = st().hist;
+  let loseStreak = 0;
+  for(const h of hist){ if(h.win > 0) break; loseStreak++; }
+  const now = Date.now();
+  if((loseStreak === 4 || loseStreak === 7) && now - _selinT > 120000){
+    _selinT = now;
+    const tpl = loseStreak >= 7 ? SELIN_MSG.streak7 : SELIN_MSG.streak4;
+    const nm = state.name === 'Misafir' ? 'dostum' : state.name;
+    toast(tpl(game).replace('{name}', esc(nm)));
+    const dot = $('chatDot'); if(dot) dot.classList.remove('hidden');
+  }
 }
 
 /* ================= DÜRTÜ RAPORU ================= */
