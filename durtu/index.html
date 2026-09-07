@@ -408,6 +408,11 @@ body.tick footer{padding-bottom:34px}
 .hud-sel{background:transparent;border:none;color:var(--gold);font-family:var(--serif);font-size:1.05rem;outline:none;width:100%}
 .hud-sel option{background:#111}
 .spin-btn{flex:1.5;padding:0;font-size:.78rem;letter-spacing:.3em;min-height:52px}
+.spin-btn.active{background:rgba(212,175,55,.22);border-color:var(--gold);color:var(--gold2);box-shadow:0 0 14px rgba(212,175,55,.3)}
+.spin-btn.stopping{background:rgba(201,106,94,.25);border-color:var(--red);color:#ff988c}
+.bet-mods{display:inline-flex;gap:3px;align-items:center}
+.pmod-btn{background:rgba(212,175,55,.08);border:1px solid var(--line);color:var(--gold);border-radius:4px;padding:.18rem .38rem;font-size:.58rem;font-weight:600;cursor:pointer;transition:all .2s;line-height:1}
+.pmod-btn:hover{background:var(--gold);color:#000;border-color:var(--gold)}
 .slot-foot{display:flex;justify-content:space-between;align-items:center;gap:.8rem;margin-top:.75rem;flex-wrap:wrap}
 .slot-foot .muted{font-size:.66rem}
 .taglink{background:none;border:none;color:var(--gold);font-size:.66rem;letter-spacing:.14em;text-decoration:underline;text-underline-offset:3px}
@@ -938,9 +943,21 @@ body.tick footer{padding-bottom:34px}
     <div class="angel-row hidden" id="slotAngel"></div>
     <div class="slot-hud">
       <div class="hud-box"><small>BAKİYE</small><b>◈ <span class="chipsVal">1.000</span></b></div>
-      <div class="hud-box"><small>BAHİS</small><select id="slotBet" class="hud-sel"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
+      <div class="hud-box">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <small>BAHİS</small>
+          <div class="bet-mods">
+            <button type="button" class="pmod-btn" onclick="modSlotBet('half')" title="Yarısı">½</button>
+            <button type="button" class="pmod-btn" onclick="modSlotBet('double')" title="2 Katı">2×</button>
+            <button type="button" class="pmod-btn" onclick="modSlotBet('max')" title="Maksimum">MAX</button>
+          </div>
+        </div>
+        <select id="slotBet" class="hud-sel"><option>10</option><option selected>25</option><option>50</option><option>100</option></select>
+      </div>
       <div class="hud-box win-hud" id="winHud"><small>KAZANÇ</small><b id="winAmt">0</b></div>
       <button class="btn solid spin-btn" id="spinBtn" onclick="slotSpin()">DÖNDÜR</button>
+      <button class="btn spin-btn" id="autoBtn" onclick="toggleAutoSpin()" title="Oto-döndürme serisi">OTO (25)</button>
+      <button class="btn spin-btn" id="turboBtn" onclick="toggleTurbo()" title="Makaraları hızlandır">⚡ TURBO</button>
       <button class="btn spin-btn" id="buyBtn" onclick="buyBonus()" title="Bahsin ×100'ü karşılığında 8 ücretsiz dönüş + biriken çarpan garantisi">⚡ BONUS <span id="buyCost" style="display:block;font-size:.6rem;opacity:.7;margin-top:.15rem">×100 = ◈ 2.500</span></button>
     </div>
     <div class="slot-foot">
@@ -974,7 +991,17 @@ body.tick footer{padding-bottom:34px}
     <div class="angel-row hidden" id="crashAngel"></div>
     <div class="slot-hud">
       <div class="hud-box"><small>BAKİYE</small><b>◈ <span class="chipsVal">1.000</span></b></div>
-      <div class="hud-box"><small>BAHİS</small><select id="crBet" class="hud-sel"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
+      <div class="hud-box">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <small>BAHİS</small>
+          <div class="bet-mods">
+            <button type="button" class="pmod-btn" onclick="modCrBet('half')" title="Yarısı">½</button>
+            <button type="button" class="pmod-btn" onclick="modCrBet('double')" title="2 Katı">2×</button>
+            <button type="button" class="pmod-btn" onclick="modCrBet('max')" title="Maksimum">MAX</button>
+          </div>
+        </div>
+        <select id="crBet" class="hud-sel"><option>10</option><option selected>25</option><option>50</option><option>100</option></select>
+      </div>
       <div class="hud-box"><small>OTO ÇIKIŞ</small><input id="crOto" class="hud-sel" placeholder="örn. 2.00" inputmode="decimal"></div>
       <button class="btn solid spin-btn" id="crStartBtn" onclick="crStart()">UÇUR</button>
       <button class="btn spin-btn" id="crCashBtn" onclick="crCash()" disabled>NAKİT ÇIKIŞ<span id="crCashVal" style="display:block;font-size:.62rem;letter-spacing:.08em;opacity:.75;margin-top:.2rem"></span></button>
@@ -1037,7 +1064,14 @@ body.tick footer{padding-bottom:34px}
     </div>
     <div class="mn-grid" id="mnGrid"></div>
     <div class="bj-msg" id="mnMsg">Bahis ve mayın sayısını seç, tarfayı başlat.</div>
-    <div class="chiprow" id="mnChips"></div>
+    <div style="display:flex;justify-content:center;align-items:center;gap:.6rem;margin-bottom:.4rem;flex-wrap:wrap">
+      <div class="chiprow" id="mnChips" style="margin:0"></div>
+      <div class="bet-mods">
+        <button type="button" class="pmod-btn" onclick="modMinesBet('half')" title="Yarısı">½</button>
+        <button type="button" class="pmod-btn" onclick="modMinesBet('double')" title="2 Katı">2×</button>
+        <button type="button" class="pmod-btn" onclick="modMinesBet('max')" title="Maksimum">MAX</button>
+      </div>
+    </div>
     <div class="mn-bar">
       <select class="inp" id="mnCount">
         <option value="1">💣 1 mayın</option>
@@ -1353,6 +1387,20 @@ body.tick footer{padding-bottom:34px}
           <span>Hedef: 10.000 dürTL</span>
         </div>
       </div>
+
+      <div class="bonus-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="tag" style="margin:0">🎫 Promosyon & Hediye</span>
+          <span class="badge-ok">Anında Bakiye</span>
+        </div>
+        <h4 style="margin:.4rem 0 .2rem;font-family:var(--serif);font-size:.95rem">Kulüp Kupon Kodu</h4>
+        <p class="muted" style="font-size:.72rem;line-height:1.5;margin:0">DÜRTÜ davetiyesi, VIP bülteni veya etkinliklerden kazandığınız kodu bozdurun.</p>
+        <div style="display:flex;gap:.5rem;margin-top:.8rem">
+          <input class="inp" id="promoInp" placeholder="Örn. DURTU2026" style="text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;padding:.55rem .8rem" autocomplete="off">
+          <button class="btn solid" id="btnClaimPromo" onclick="claimPromoCode()" style="white-space:nowrap;padding:.55rem 1.1rem;font-size:.68rem">KODU BOZDUR</button>
+        </div>
+        <p class="muted" id="promoMsg" style="font-size:.62rem;margin-top:.4rem;min-height:1.1em"></p>
+      </div>
     </div>
 
     <!-- 4. İŞLEM DEFTERİ (LEDGER) -->
@@ -1382,7 +1430,7 @@ body.tick footer{padding-bottom:34px}
 
 <script>
 /* ================= STATE ================= */
-const state = { name:'Emre', chips:1000, invites:3, entered:false, codes:[], streakDays:0, stats:null };
+const state = { name:'Emre', chips:1000, invites:3, entered:false, codes:[], streakDays:0, stats:null, claimedPromos:[] };
 function st(){ const t = state.stats = state.stats || { spins:0, won:0, wagered:0, big:0 }; if(!Array.isArray(t.hist)) t.hist = []; return t; }
 
 const GAMES = [
@@ -1427,6 +1475,7 @@ function snapshot(){
   return { chips: state.chips, name: state.name, best: (typeof CR !== 'undefined' && CR.best) || 0,
     invites: state.invites, codes: state.codes || [], lastDay: new Date().toDateString(),
     streakDays: state.streakDays || 0, stats: state.stats,
+    claimedPromos: state.claimedPromos || [],
     ledger: (typeof VAULT !== 'undefined' ? VAULT.ledger : []) };
 }
 function saveDemo(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); }catch(e){} cloudPush(); }
