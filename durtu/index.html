@@ -448,6 +448,12 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .tcell.gold{border-color:var(--gold);box-shadow:0 0 12px rgba(212,175,55,.35);transform:scale(1.05)}
 
 .auth-err{color:var(--red);font-size:.68rem;margin:.45rem 0 .2rem}
+.hist-head{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .3rem;border-top:1px dashed rgba(212,175,55,.15);padding-top:.8rem}
+.hist-list{max-height:150px;overflow-y:auto;scrollbar-width:thin}
+.hrow{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;padding:.34rem .1rem;border-bottom:1px dashed rgba(255,255,255,.05);font-size:.68rem;color:var(--muted)}
+.hrow b{font-family:var(--serif);font-weight:600}
+.hrow .hw{color:var(--gold)} .hrow .hl{color:var(--red)}
+.hrow .hx{color:var(--muted);font-size:.6rem;letter-spacing:.06em}
 /* Masa oyunları */
 .bj-felt{background:radial-gradient(ellipse at 50% 0,rgba(30,90,50,.5),transparent 72%),linear-gradient(180deg,#0f2b1a,#0a1d11);
  border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:1rem .8rem .9rem;margin:.9rem 0 .7rem;position:relative;
@@ -801,6 +807,8 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
       <div class="stat-row"><span>Aviator rekoru</span><b id="stCrash">—</b></div>
       <div class="stat-row"><span>Gün serisi</span><b id="stStreak">1 gün</b></div>
     </div>
+    <div class="hist-head">Son turlar</div>
+    <div class="hist-list" id="stHist"></div>
     <p class="serif" id="stVerdict" style="font-style:italic;color:var(--muted);margin-top:1rem;text-align:center;line-height:1.7"></p>
     <button class="btn solid" style="width:100%" onclick="closeOvl('ovlStats')">Anlaşıldı</button>
   </div>
@@ -1289,7 +1297,7 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 <script>
 /* ================= STATE ================= */
 const state = { name:'Emre', chips:1000, invites:3, entered:false, codes:[], streakDays:0, stats:null };
-function st(){ return state.stats = state.stats || { spins:0, won:0, wagered:0, big:0 }; }
+function st(){ const t = state.stats = state.stats || { spins:0, won:0, wagered:0, big:0 }; if(!Array.isArray(t.hist)) t.hist = []; return t; }
 
 const GAMES = [
  {id:'gates', icon:'⚡', name:'Gates of Olympus', cat:'risk', catL:'🎩 Yüksek Risk', rtp:'96.50', vol:'Yüksek', type:'slot',
@@ -1837,6 +1845,7 @@ function onSettle(){
   if(total > 0){
     state.chips += total; renderChips(); giftWin();
     st().won += total; st().big = Math.max(st().big, total);
+    logRound(SL.gname || 'Slot', SL.bet, total, Math.round((total / SL.bet) * 100) / 100);
     if(typeof addLedgerEntry === 'function' && total >= 100) addLedgerEntry('Slot Kazancı', total, (SL.theme && SL.theme.name) || 'Slot', 'ok');
     SL.winTarget = total;
     $('winHud').classList.add('hot');
@@ -1857,6 +1866,7 @@ function onSettle(){
       toast('🎉 <b>Büyük kazanç!</b> ' + fmt(total) + ' dürTL — Selin bunu duymak isteyecek.');
     }
   } else {
+    if(SL.fsMul === 1) logRound(SL.gname || 'Slot', SL.bet, 0);
     $('slotMsg').textContent = ['Bu tur olmadı. Dürtü sabırlı olanı sever.','Isınıyor…','Şeritler seni duyuyor, bir tur daha?'][Math.random()*3|0];
     giftLose();
   }
@@ -1897,6 +1907,7 @@ function togglePaytable(){ $('ptable').classList.toggle('hidden'); }
 function openSlot(id){
   const g = GAMES.find(x => x.id === id) || GAMES[0];
   SL.theme = SLOT_THEMES[id] || SLOT_THEMES.gates;
+  SL.gname = g.name;
   SL.strips = [0,1,2,3,4].map(() => buildStrip(SL.theme));
   SL.pos = [0,0,0,0,0].map(() => Math.random()*20 | 0);
   SL.vel = [0,0,0,0,0]; SL.stopT = [9,9,9,9,9];
@@ -2072,6 +2083,7 @@ function crCash(auto){
   state.chips += win; renderChips(); crBal();
   st().won += win;
   if(typeof addLedgerEntry === 'function') addLedgerEntry('Aviator Çıkışı', win, m.toFixed(2) + '× Çarpan', 'ok');
+  logRound('Aviator', CR.bet, win, Math.round(m * 100) / 100);
   saveDemo();
   tone(523, 0, .15, 'triangle', .12); tone(784, .1, .25, 'triangle', .12);
   buzz([30,45,75]);
@@ -2094,6 +2106,7 @@ function crEnd(){
   if(CR.cashed){
     $('crMsg').innerHTML = `<span style="color:var(--gold)">Uçak ${CR.crash.toFixed(2)}× noktasında düştü — sen çoktan inmiştin. Dürtü bunu not etti.</span>`;
   } else {
+    logRound('Aviator', CR.bet, 0, Math.round(CR.crash * 100) / 100);
     $('crMsg').textContent = 'Uçak ' + CR.crash.toFixed(2) + '× noktasında düştü. Bahis sofaya kaldı — nefes al, yeni tur geliyor.';
   }
   angelSay('crash', CR.cashed ? 'win' : 'lose');
@@ -2887,18 +2900,22 @@ function bjSettle(res, note){
   if(res === 'bj'){
     const pay = Math.floor(BJ.bet * 2.5);            // 3:2 öder
     state.chips += pay; st().won += pay; st().big = Math.max(st().big, pay - BJ.bet);
+    logRound('Blackjack', BJ.bet, pay, 2.5);
     bjMsg('BLACKJACK! ◈ +' + fmt(pay - BJ.bet) + ' dürTL', 'win');
     sfxWin(3); buzz([30, 40, 30]);
   } else if(res === 'win'){
     const pay = BJ.bet * 2;
     state.chips += pay; st().won += pay; st().big = Math.max(st().big, pay - BJ.bet);
+    logRound('Blackjack', BJ.bet, pay, 2);
     bjMsg((note ? note + ' ' : '') + 'Kazandın: ◈ +' + fmt(BJ.bet) + ' dürTL', 'win');
     sfxWin(1.5); buzz(25);
   } else if(res === 'push'){
     state.chips += BJ.bet;
+    logRound('Blackjack', BJ.bet, BJ.bet, 1);
     bjMsg('Beri — bahsin iade edildi.');
     tone(440, 0, .1, 'triangle', .08);
   } else {
+    logRound('Blackjack', BJ.bet, 0);
     bjMsg((note ? note + ' ' : '') + 'El krupiyenin.', 'lose');
     tone(220, 0, .18, 'sawtooth', .07);
   }
@@ -3021,6 +3038,7 @@ function rouSettle(n, bet){
   const mul = rouPays(ROU.sel)(n);
   const msg = $('rouMsg');
   const renk = n === 0 ? 'yeşil' : (RL_RED.has(n) ? 'kırmızı' : 'siyah');
+  logRound('Rulet', bet, mul > 0 ? bet * mul : 0, mul > 0 ? mul : null);
   if(mul > 0){
     const pay = bet * mul;
     state.chips += pay; st().won += pay; st().big = Math.max(st().big, pay - bet);
@@ -3152,6 +3170,11 @@ async function cloudApply(name, why){
   }catch(e){ /* yerel kopya zaten alındı */ }
 }
 
+function logRound(game, bet, win, mul){
+  st().hist.unshift({ ts: Date.now(), game, bet, win, mul: mul || null });
+  if(st().hist.length > 80) st().hist.length = 80;
+}
+
 /* ================= DÜRTÜ RAPORU ================= */
 function openStats(){
   const s2 = st();
@@ -3173,6 +3196,14 @@ function openStats(){
   else if(s2.wagered > 0 && Math.abs(net) < s2.wagered * .3) v = '“Ufak bir eksi var; ritmini bozma, ara verdiğinde geçer.”';
   else v = '“Bu hafta kırmızıdasın. Meleğin mola demeden duramasın — limitin var.”';
   $('stVerdict').textContent = v;
+  const hh = st().hist.slice(0, 25);
+  $('stHist').innerHTML = hh.length ? hh.map(h2 => {
+    const d = new Date(h2.ts);
+    const saat = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    const net = (h2.win || 0) - (h2.bet || 0);
+    return '<div class="hrow"><span><span class="hx">' + saat + '</span>  ' + h2.game + ' · bahis ◈ ' + fmt(h2.bet || 0) + '</span>' +
+      '<b class="' + (net >= 0 ? 'hw' : 'hl') + '">' + (h2.win > 0 ? '+' + fmt(h2.win) + (h2.mul ? ' <span class="hx">×' + h2.mul + '</span>' : '') : (net < 0 ? '−' + fmt(h2.bet || 0) : 'iade')) + '</b></div>';
+  }).join('') : '<div class="hrow"><span>Henüz kayıtlı tur yok — ilk dönüşünü yap.</span></div>';
   openOvl('ovlStats');
 }
 
