@@ -61,7 +61,7 @@ globalThis.setTimeout = () => 0; globalThis.setInterval = () => 0; globalThis.cl
 
 /* ---------- 3) Uygulamayı bu bağlamda çalıştır ---------- */
 const run = new Function('document', 'window', 'localStorage', 'navigator', 'performance', 'requestAnimationFrame', 'cancelAnimationFrame', 'IntersectionObserver', 'MutationObserver', 'fetch', 'AudioContext', 'webkitAudioContext',
-  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null }');
+  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null }');
 let app;
 try {
   app = run(document, window, localStorage, navigator, performance, requestAnimationFrame, cancelAnimationFrame, IntersectionObserver, MutationObserver, fetch, ACStub, ACStub);
@@ -172,6 +172,28 @@ console.log('\n💣 Mines:');
   T('Çarpan artan eldizilim (3 mayın, 22 güvenli)', mono);
   T('1 mayında tüm tarla: son ~24.25×', Math.abs(M(1,24) - 0.97*25) < 0.6, 'geç: ' + M(1,24));
   T('20 mayında 4 güvenli karoda yüklü çarpan', M(20,4) > 5, 'geç: ' + M(20,4).toFixed(2));
+}
+
+/* ---------- 8.6) Promosyon Kodları ---------- */
+console.log('\n🎁 Promosyon Kodları:');
+{
+  const P = app.PROMO_CODES;
+  T('DURTU2026 tanımlı ve 500 dürTL değerinde', P && P['DURTU2026'] && P['DURTU2026'].amt === 500);
+  T('VIP-KULUP tanımlı ve 1000 dürTL değerinde', P && P['VIP-KULUP'] && P['VIP-KULUP'].amt === 1000);
+  
+  // Kod bozdurma testi
+  const inp = document.getElementById('promoInp');
+  const initialChips = app.state.chips;
+  inp.value = 'DURTU2026';
+  app.claimPromoCode();
+  T('Kodu bozdurunca bakiye artar (+500)', app.state.chips === initialChips + 500);
+  T('Kullanılan kod claimedPromos içine işlenir', app.state.claimedPromos.includes('DURTU2026'));
+  
+  // Çift kullanım engeli
+  const afterFirstClaim = app.state.chips;
+  inp.value = 'DURTU2026';
+  app.claimPromoCode();
+  T('Aynı kod ikinci kez kullanılamaz (çift kullanım engeli)', app.state.chips === afterFirstClaim);
 }
 
 /* ---------- 9) Sonuç ---------- */

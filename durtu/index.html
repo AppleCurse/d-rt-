@@ -1891,6 +1891,100 @@ function buyCostNow(){ const b = +($('slotBet') ? $('slotBet').value : 25); retu
 function renderBuyCost(){
   const el = $('buyCost'); if(el) el.textContent = '×100 = ◈ ' + fmt(buyCostNow());
 }
+function modSlotBet(mode){
+  const sel = $('slotBet'); if(!sel) return;
+  const opts = Array.from(sel.options).map(o => +o.value);
+  const cur = +sel.value;
+  let next = cur;
+  if(mode === 'half'){
+    const f = opts.filter(v => v < cur);
+    next = f.length ? f[f.length - 1] : opts[0];
+  } else if(mode === 'double'){
+    const f = opts.filter(v => v > cur);
+    next = f.length ? f[0] : opts[opts.length - 1];
+  } else if(mode === 'max'){
+    const f = opts.filter(v => v <= state.chips);
+    next = f.length ? f[f.length - 1] : opts[opts.length - 1];
+  }
+  sel.value = String(next);
+  renderBuyCost();
+  buzz(15);
+}
+function modCrBet(mode){
+  const sel = $('crBet'); if(!sel) return;
+  const opts = Array.from(sel.options).map(o => +o.value);
+  const cur = +sel.value;
+  let next = cur;
+  if(mode === 'half'){
+    const f = opts.filter(v => v < cur);
+    next = f.length ? f[f.length - 1] : opts[0];
+  } else if(mode === 'double'){
+    const f = opts.filter(v => v > cur);
+    next = f.length ? f[0] : opts[opts.length - 1];
+  } else if(mode === 'max'){
+    const f = opts.filter(v => v <= state.chips);
+    next = f.length ? f[f.length - 1] : opts[opts.length - 1];
+  }
+  sel.value = String(next);
+  buzz(15);
+}
+function modMinesBet(mode){
+  if(typeof MN === 'undefined') return;
+  const chips = [10, 25, 50, 100, 250];
+  const cur = MN.bet || 25;
+  let next = cur;
+  if(mode === 'half'){
+    const f = chips.filter(v => v < cur);
+    next = f.length ? f[f.length - 1] : chips[0];
+  } else if(mode === 'double'){
+    const f = chips.filter(v => v > cur);
+    next = f.length ? f[0] : chips[chips.length - 1];
+  } else if(mode === 'max'){
+    const f = chips.filter(v => v <= state.chips);
+    next = f.length ? f[f.length - 1] : chips[chips.length - 1];
+  }
+  mnChip(next);
+  buzz(15);
+}
+
+function updateAutoBtn(){
+  const b = $('autoBtn'); if(!b) return;
+  if(SL.autoCount > 0){
+    b.textContent = 'DURDUR (' + SL.autoCount + ')';
+    b.classList.add('stopping');
+  } else {
+    b.textContent = 'OTO (' + (SL.autoTarget || 25) + ')';
+    b.classList.remove('stopping');
+  }
+}
+function toggleAutoSpin(){
+  if(SL.autoCount > 0){
+    stopAutoSpin('Kullanıcı durdurdu');
+  } else {
+    if(SL.spinning) return;
+    const bet = +$('slotBet').value;
+    if(state.chips < bet){ toast('Yetersiz bakiye — kapıdaki makineler hâlâ sıcak.'); return; }
+    SL.autoTarget = SL.autoTarget || 25;
+    SL.autoCount = SL.autoTarget;
+    updateAutoBtn();
+    slotSpin();
+  }
+}
+function stopAutoSpin(reason){
+  SL.autoCount = 0;
+  updateAutoBtn();
+  if(reason && reason !== 'Kullanıcı durdurdu') toast(reason);
+}
+function toggleTurbo(){
+  SL.turbo = !SL.turbo;
+  const b = $('turboBtn');
+  if(b){
+    if(SL.turbo){ b.classList.add('active'); b.textContent = '⚡ TURBO AÇIK'; }
+    else { b.classList.remove('active'); b.textContent = '⚡ TURBO'; }
+  }
+  buzz(15);
+}
+
 function buyBonus(){
   if(!SL.open || SL.spinning) return;
   const cost = buyCostNow(), name = SL.gname || 'Slot';
@@ -1914,7 +2008,10 @@ function slotSpin(){
   const free = SL.fsPool > 0;
   if(free) SL.fsPool--;
   else{
-    if(state.chips < bet){ toast('Yetersiz demo bakiyesi — kapıdaki minik makineler hâlâ sıcak.'); return; }
+    if(state.chips < bet){
+      if(SL.autoCount > 0) stopAutoSpin('Bakiye tükendi');
+      toast('Yetersiz demo bakiyesi — kapıdaki minik makineler hâlâ sıcak.'); return;
+    }
     state.chips -= bet; renderChips();
     st().wagered += bet; st().spins++;
   }
@@ -1926,18 +2023,19 @@ function slotSpin(){
   $('winHud').classList.remove('hot');
   updateFsBanner();
   // makara hedefleri
+  const spSpeed = SL.turbo ? 0.38 : 1;
   SL.strips.forEach((st, c) => {
     const L = st.length, target = Math.random()*L | 0;
     const cur = ((SL.pos[c] % L) + L) % L;
     const dist = (2 + c) * L + (((target - cur) % L) + L) % L;
-    const dur = .85 + .3 * c;
+    const dur = (.85 + .3 * c) * spSpeed;
     SL.stopAt[c] = SL.pos[c] + dist;
     SL.vel[c] = 2 * dist / dur;
     SL.decel[c] = SL.vel[c] / dur;
   });
   sfxSpinStart();
   clearInterval(SL.tickIv);
-  SL.tickIv = setInterval(() => sfxOn && tone(1150, 0, .022, 'square', .02), 85);
+  SL.tickIv = setInterval(() => sfxOn && tone(1150, 0, .022, 'square', .02), SL.turbo ? 42 : 85);
 }
 
 /* --- değerlendirme --- */
@@ -2035,11 +2133,23 @@ function onSettle(){
   // ücretsiz dönüş zinciri
   updateFsBanner();
   if(SL.fsPool > 0){
-    setTimeout(() => { if(SL.open && !SL.spinning) slotSpin(); }, 1400);
+    setTimeout(() => { if(SL.open && !SL.spinning) slotSpin(); }, SL.turbo ? 450 : 1400);
   } else {
     SL.fsMul = 1;
     $('fsBanner').classList.add('hidden');
     $('spinBtn').disabled = false;
+    if(SL.autoCount > 0){
+      SL.autoCount--;
+      updateAutoBtn();
+      if(SL.autoCount <= 0){
+        stopAutoSpin('Oto-döndürme serisi tamamlandı.');
+      } else if(state.chips < SL.bet){
+        stopAutoSpin('Bakiye tükendi');
+        toast('Bakiye yetersiz — oto-döndürme durduruldu.');
+      } else {
+        setTimeout(() => { if(SL.open && !SL.spinning && SL.autoCount > 0) slotSpin(); }, SL.turbo ? 320 : 850);
+      }
+    }
   }
 }
 function updateFsBanner(){
@@ -2085,11 +2195,13 @@ function openSlot(id){
   renderAngelInto('slot');
   fitCanvas();
   SL.open = true; SL.lastT = performance.now();
+  SL.autoCount = 0; updateAutoBtn();
   cancelAnimationFrame(SL.raf);
   SL.raf = requestAnimationFrame(loop);
 }
 function slotQuit(){
   SL.open = false; SL.spinning = false;
+  SL.autoCount = 0; updateAutoBtn();
   clearInterval(SL.tickIv);
   cancelAnimationFrame(SL.raf);
   SL.fsPool = 0; SL.fsMul = 1;
@@ -3879,6 +3991,50 @@ function claimNightBonus(){
   sfxWin(1.8);
   toast('✈️ <b>Gece Yakıtı Yüklendi!</b> ◈ +' + fmt(amt) + ' dürTL hesabınıza tanımlandı.');
   updateVaultBonus();
+}
+
+const PROMO_CODES = {
+  'DURTU2026': { amt: 500, label: 'Kulüp Hoş Geldin Kuponu' },
+  'VIP-KULUP': { amt: 1000, label: 'VIP Kurucu Bakiyesi' },
+  'SELIN-GIFT': { amt: 350, label: "Selin'in Şans İkramı" },
+  'TURBO777': { amt: 777, label: 'Yüksek Adrenalin Paketi' },
+  'KASA50': { amt: 50, label: 'Mini Lobi Çipi' }
+};
+
+function claimPromoCode(){
+  const inp = $('promoInp'); if(!inp) return;
+  const msg = $('promoMsg');
+  const code = (inp.value || '').trim().toUpperCase();
+  if(!code){
+    if(msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Lütfen bir promosyon kodu girin.'; }
+    return;
+  }
+  state.claimedPromos = state.claimedPromos || [];
+  if(state.claimedPromos.includes(code)){
+    if(msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Bu kodu daha önce kullandınız.'; }
+    toast('Bu promosyon kodu daha önce tahsil edildi.');
+    return;
+  }
+  const promo = PROMO_CODES[code];
+  if(!promo){
+    if(msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Geçersiz veya süresi dolmuş kod.'; }
+    toast('Geçersiz promosyon kodu.');
+    return;
+  }
+  state.claimedPromos.push(code);
+  state.chips += promo.amt;
+  renderChips();
+  if(typeof addLedgerEntry === 'function'){
+    addLedgerEntry('Promosyon Kodu', promo.amt, promo.label, 'ok');
+  }
+  tone(523, 0, .08, 'triangle', .1);
+  setTimeout(() => tone(659, 0, .08, 'triangle', .1), 90);
+  setTimeout(() => tone(784, 0, .14, 'triangle', .15), 180);
+  buzz([20, 30, 45]);
+  if(msg) { msg.style.color = 'var(--gold)'; msg.textContent = '✓ ' + promo.label + ' tanımlandı: +◈ ' + fmt(promo.amt) + ' dürTL!'; }
+  toast('🎁 <b>Promosyon aktif:</b> +' + fmt(promo.amt) + ' dürTL (' + promo.label + ') hesabına geçti.');
+  inp.value = '';
+  saveDemo();
 }
 
 function addLedgerEntry(type, amt, method, status){
