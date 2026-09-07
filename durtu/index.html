@@ -51,20 +51,21 @@ label{font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(-
 
 /* ---------- GATE ---------- */
 #gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
-  padding:2rem;position:relative;z-index:2;
-  background:radial-gradient(ellipse 90% 60% at 50% 30%,rgba(212,175,55,.06),transparent 60%),var(--bg);
+  padding:clamp(.8rem, 2vh, 1.8rem) clamp(1rem, 3vw, 2.5rem);position:relative;z-index:2;box-sizing:border-box;overflow-x:hidden;
+  background:radial-gradient(ellipse 90% 60% at 50% 30%,rgba(212,175,55,.07),transparent 65%),var(--bg);
   transition:opacity 1.1s,transform 1.1s}
 #gate.leaving{opacity:0;transform:scale(1.04);pointer-events:none}
-.gate-mark{font-size:1.4rem;color:var(--gold);animation:pulse 3.2s ease-in-out infinite}
-.gate-logo{font-family:var(--serif);font-size:clamp(2.6rem,8vw,4.6rem);font-weight:600;letter-spacing:.32em;margin:1.1rem 0 .2rem;text-indent:.32em;
+.gate-mark{font-size:1.3rem;color:var(--gold);animation:pulse 3.2s ease-in-out infinite}
+.gate-logo{font-family:var(--serif);font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:600;letter-spacing:.26em;margin:.35rem 0 .15rem;text-indent:.26em;
   background:linear-gradient(100deg,#8a6d1f 0%,#D4AF37 32%,#f6e27a 50%,#D4AF37 68%,#8a6d1f 100%);
   background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}
-.gate-rule{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.3rem auto}
-.gate-sub{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:1.02rem;margin-bottom:2.4rem}
-.gate-form{width:min(340px,100%);display:flex;flex-direction:column;gap:.7rem}
-.gate-form .inp{text-align:center;letter-spacing:.3em;text-transform:uppercase}
-.gate-hint{font-size:.7rem;color:var(--muted);margin-top:.4rem}
-.gate-foot{margin-top:2.4rem;font-size:.62rem;letter-spacing:.18em;color:#57534a;text-transform:uppercase;padding:0 1rem}
+.gate-rule{width:90px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.65rem auto}
+.gate-sub{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:.95rem;margin-bottom:.3rem}
+.gate-form{width:100%;max-width:680px;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:.85rem}
+.gate-form .inp{width:210px;padding:.68rem 1rem;text-align:center;letter-spacing:.28em;text-transform:uppercase;font-size:.85rem}
+.gate-form .btn{padding:.68rem 1.4rem;font-size:.68rem;white-space:nowrap}
+.gate-hint{font-size:.68rem;color:var(--muted);margin-top:.35rem;width:100%}
+.gate-foot{margin-top:.85rem;font-size:.62rem;letter-spacing:.16em;color:#57534a;text-transform:uppercase;padding:0 1rem}
 .shake{animation:shake .5s}
 #doorMsg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;
   background:var(--bg);z-index:50;opacity:0;pointer-events:none;transition:opacity .6s}
@@ -90,24 +91,24 @@ nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-con
 .icon-btn:hover{border-color:var(--gold-dim);color:var(--gold)}
 .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3a2f10,#D4AF37);display:flex;align-items:center;justify-content:center;
   font-family:var(--serif);color:#0A0A0A;font-weight:600;font-size:.9rem}
-main{max-width:1120px;margin:0 auto;padding:clamp(1.4rem,4vw,3rem) clamp(1rem,4vw,2.4rem) 4rem}
-section{margin-bottom:4.2rem}
+main{max-width:min(1420px, 94vw);margin:0 auto;padding:clamp(1.2rem, 3vw, 2.4rem) clamp(1rem, 3vw, 2.2rem) 3.5rem}
+section{margin-bottom:2.8rem}
 .rv{opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease}
 .rv.on{opacity:1;transform:none}
 
-.hero-head{margin-bottom:2.2rem}
+.hero-head{margin-bottom:1.5rem}
 .hero-head h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.7rem,4.4vw,2.7rem);margin:.5rem 0 .3rem}
-.banners{display:flex;flex-direction:column;gap:.55rem;margin-top:1.2rem}
+.banners{display:flex;flex-direction:column;gap:.55rem;margin-top:1rem}
 .banner{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border:1px solid var(--line);background:rgba(212,175,55,.05);
   border-radius:6px;padding:.6rem .95rem;font-size:.8rem;color:var(--cream)}
 .banner .btn{padding:.4rem .9rem;font-size:.6rem}
-h2.sect{font-family:var(--serif);font-weight:600;font-size:1.25rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem}
+h2.sect{font-family:var(--serif);font-weight:600;font-size:1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:.8rem}
 h2.sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
 
 /* Hero picks */
-.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem}
 .pick{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;
-  padding:1.5rem 1.3rem 1.3rem;transition:all .4s;overflow:hidden}
+  padding:1.4rem 1.3rem 1.2rem;transition:all .4s;overflow:hidden}
 .pick::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .4s}
 .pick:hover{transform:translateY(-4px);border-color:var(--gold-dim);box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 26px rgba(212,175,55,.08)}
 .pick:hover::before{opacity:1}
@@ -116,7 +117,7 @@ h2.sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var
 .pick p{font-size:.8rem;color:var(--muted);line-height:1.55;margin-bottom:1.1rem}
 
 /* Strips */
-.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:1rem}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;margin-top:.8rem}
 .mini{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.2rem;transition:all .35s}
 .mini:hover{border-color:var(--gold-dim)}
 .mini h4{font-family:var(--serif);font-size:1rem;font-weight:600;margin:.55rem 0 .45rem}
@@ -233,8 +234,8 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 
 
 /* ---- KAPI SAHNESİ: 3B mini makineler + rulet ---- */
-.stage3d{position:relative;width:min(780px,100%);margin:2.4rem auto 0;padding:2rem .6rem 3.2rem;perspective:1050px;perspective-origin:50% 18%}
-.spotlight{position:absolute;inset:-12% -18%;pointer-events:none;background:
+.stage3d{position:relative;width:min(1360px,96vw);max-width:1360px;margin:.5rem auto 0;padding:.6rem .6rem 1.2rem;perspective:1200px;perspective-origin:50% 25%}
+.spotlight{position:absolute;inset:-25% -25%;pointer-events:none;background:
  radial-gradient(ellipse 44% 58% at 26% 30%,rgba(212,175,55,.15),transparent 60%),
  radial-gradient(ellipse 58% 54% at 74% 26%,rgba(212,175,55,.10),transparent 62%);animation:spot 9s ease-in-out infinite alternate}
 @keyframes spot{to{opacity:.7}}
@@ -242,11 +243,11 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .f1{left:-6%;bottom:12%;animation:fogx 14s ease-in-out infinite alternate}
 .f2{right:-4%;bottom:4%;animation:fogx 18s ease-in-out infinite alternate-reverse}
 @keyframes fogx{to{transform:translateX(64px)}}
-.velvet{position:absolute;left:5%;right:5%;bottom:.9rem;height:70px;border-radius:50%;
+.velvet{position:absolute;left:2%;right:2%;bottom:.4rem;height:60px;border-radius:50%;
  background:radial-gradient(ellipse at 50% 30%,#161310 0%,#0a0908 58%,transparent 76%);filter:blur(3px)}
 .gm-sub{font-size:.74rem;color:var(--muted);margin:.55rem 0 1.4rem;max-width:560px;margin-left:auto;margin-right:auto}
-.stage-row{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:clamp(1.4rem,4vw,3.4rem);flex-wrap:wrap;z-index:2}
-.lobby-hc{margin-top:1.6rem;font-size:.78rem;color:var(--gold);letter-spacing:.12em;position:relative;z-index:2}
+.stage-row{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:clamp(2rem,5vw,5.5rem);flex-wrap:nowrap;z-index:2}
+.lobby-hc{margin-top:.8rem;font-size:.76rem;color:var(--gold);letter-spacing:.12em;position:relative;z-index:2}
 .lobby-hc small{color:var(--muted);letter-spacing:.05em}
 
 /* Rulet (Avrupa, 37 cep) */
@@ -266,11 +267,11 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .rl-ball{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;z-index:3;pointer-events:none;
  background:radial-gradient(circle at 35% 28%,#ffffff,#c9c4b4 68%,#8f8a7c);box-shadow:0 0 7px rgba(255,255,255,.75)}
 .rl-shadow{position:absolute;left:2%;right:2%;bottom:-6px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.8),transparent 70%);filter:blur(5px);z-index:-1}
-.rl-msg{margin-top:1.35rem;font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-align:center;min-height:1em}
+.rl-msg{margin-top:.8rem;font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-align:center;min-height:1em}
 .rl-msg.win{color:var(--gold)}
 
 /* 3B mini slot makineleri */
-.m3d-row{display:flex;justify-content:center;align-items:flex-end;gap:clamp(2.7rem,7vw,5rem);position:relative;padding:1.2rem 0 .3rem}
+.m3d-row{display:flex;justify-content:center;align-items:flex-end;gap:clamp(1.6rem,3.5vw,3.6rem);position:relative;padding:.6rem 0 .2rem}
 .m3d-row::before{content:"";position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);width:min(720px,98%);height:36px;border-radius:50%;background:radial-gradient(ellipse,rgba(212,175,55,.08),transparent 70%)}
 .m3d-row::after{content:"";position:absolute;left:50%;top:-50px;transform:translateX(-50%);width:78%;height:130px;background:radial-gradient(ellipse at 50% 0,rgba(246,226,122,.07),transparent 62%);pointer-events:none}
 .m3d-g{display:flex;flex-direction:column;align-items:center;position:relative}
@@ -326,8 +327,8 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
  background:radial-gradient(circle at 40% 30%,#f6e27a,#7a5c17);box-shadow:0 1px 2px rgba(0,0,0,.8)}
 .mlabel{font-size:8px;color:var(--muted);letter-spacing:.12em;margin-top:11px;text-align:center;max-width:150px}
 .m3d-shadow{position:absolute;bottom:-13px;left:-9%;right:-26%;height:20px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.82),transparent 70%);filter:blur(5px);z-index:-2}
-@media (max-width:820px){.stage3d{transform:scale(.78);margin-top:-.6rem}}
-@media (max-width:440px){.stage3d{transform:scale(.62);margin-top:-1.6rem;margin-bottom:-1rem}}
+@media (max-width:920px){.stage-row{flex-wrap:wrap;gap:1.6rem}.stage3d{transform:scale(.86);margin-top:-.4rem}}
+@media (max-width:500px){.stage3d{transform:scale(.68);margin-top:-1.4rem;margin-bottom:-1rem}}
 
 /* Canlı kazanç şeridi (live ticker) */
 #ticker{position:fixed;left:0;right:0;bottom:0;z-index:35;height:34px;overflow:hidden;
@@ -344,21 +345,21 @@ body.tick footer{padding-bottom:34px}
 .tick-item .tu{color:var(--gold2)}
 
 /* Kapı melekleri */
-.gate-angels{margin-top:1.2rem;position:relative;z-index:2;width:100%}
-.ga-row{display:flex;justify-content:center;gap:.9rem;flex-wrap:wrap;margin-top:.8rem}
-.ga-card{width:150px;background:linear-gradient(180deg,rgba(22,22,20,.92),rgba(12,12,11,.92));border:1px solid var(--line);
-  border-radius:12px;padding:.85rem .7rem .75rem;text-align:center;transition:all .4s;position:relative}
+.gate-angels{margin-top:.8rem;position:relative;z-index:2;width:100%}
+.ga-row{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;margin-top:.5rem}
+.ga-card{width:136px;background:linear-gradient(180deg,rgba(22,22,20,.92),rgba(12,12,11,.92));border:1px solid var(--line);
+  border-radius:10px;padding:.65rem .55rem .6rem;text-align:center;transition:all .4s;position:relative}
 .ga-card:hover{border-color:var(--gd);transform:translateY(-3px)}
 .ga-lock{opacity:.55;filter:saturate(.5)}
 .ga-mine{border-color:var(--gold);box-shadow:0 0 24px rgba(212,175,55,.25)}
-.ga-av{width:44px;height:44px;margin:0 auto .4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:1.3rem;border:1px solid var(--gd);background:radial-gradient(circle at 35% 30%,#2a2110,#0e0d09)}
-.ga-nm{font-family:var(--serif);font-weight:600;font-size:.92rem}
-.ga-tg{font-size:.58rem;color:var(--muted);letter-spacing:.08em;margin:.15rem 0 .5rem;min-height:1.5em}
-.ga-pr{font-size:.62rem;color:var(--gold);margin-bottom:.55rem}
+.ga-av{width:38px;height:38px;margin:0 auto .3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.15rem;border:1px solid var(--gd);background:radial-gradient(circle at 35% 30%,#2a2110,#0e0d09)}
+.ga-nm{font-family:var(--serif);font-weight:600;font-size:.88rem}
+.ga-tg{font-size:.56rem;color:var(--muted);letter-spacing:.08em;margin:.1rem 0 .4rem;min-height:1.4em}
+.ga-pr{font-size:.6rem;color:var(--gold);margin-bottom:.45rem}
 .ga-pr s{color:var(--muted);opacity:.7;margin-left:.3rem}
-.ga-btn{background:transparent;border:1px solid var(--line);color:var(--gold);border-radius:4px;padding:.35rem .8rem;
-  font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;transition:all .3s;width:100%}
+.ga-btn{background:transparent;border:1px solid var(--line);color:var(--gold);border-radius:4px;padding:.3rem .6rem;
+  font-size:.54rem;letter-spacing:.18em;text-transform:uppercase;transition:all .3s;width:100%}
 .ga-btn:hover:not(:disabled){background:var(--gold);color:#000}
 .ga-lock .ga-btn{color:var(--muted);border-style:dashed}
 .ga-mine .ga-btn{border-color:var(--gold);color:var(--gold2)}
@@ -594,11 +595,11 @@ body.tick footer{padding-bottom:34px}
 
 <!-- ============ GATE ============ -->
 <section id="gate">
-  <span class="tag" style="letter-spacing:.42em;margin-bottom:1.4rem;display:block">K a p a l ı &nbsp; K u l ü p</span>
+  <span class="tag" style="letter-spacing:.38em;margin-bottom:.4rem;display:block">K a p a l ı &nbsp; K u l ü p</span>
   <div class="gate-logo">DÜRTÜ</div>
   <div class="gate-rule"></div>
   <p class="gate-sub">“Dürtü seni çağırıyor.”</p>
-  <p class="gate-hint" style="margin:-1.5rem 0 2.1rem;letter-spacing:.14em">Seçilmişler için · Giriş yalnızca davetle</p>
+  <p class="gate-hint" style="margin:0 0 .7rem;letter-spacing:.14em">Seçilmişler için · Giriş yalnızca davetle</p>
   <div class="stage3d">
     <div class="spotlight"></div><div class="fog f1"></div><div class="fog f2"></div>
     <div class="stage-row">
@@ -2351,7 +2352,9 @@ let preAngel = null;
 const GATE_PRICE = { luna: 40, vega: 30, mira: 70 };   // kapı fiyatı < içerideki fiyat (60/45/100)
 
 function addLobby(w){
-  addLobby(w);
+  lobby += w;
+  const el = $('lobbyChips');
+  if(el) el.textContent = fmt(lobby);
   renderGateAngels();
 }
 function renderGateAngels(){
