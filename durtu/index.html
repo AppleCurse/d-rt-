@@ -21,9 +21,9 @@
   --serif:'Playfair Display',Georgia,'Times New Roman',serif;
   --sans:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
 }
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--cream);font-family:var(--sans);font-weight:300;overflow-x:hidden;transition:background .8s}
+body{background:var(--bg);color:var(--cream);font-family:var(--sans);font-weight:300;overflow-x:hidden;transition:background .8s;touch-action:manipulation}
 body.night{--bg:#050505;--card:#0c0c0b;--card2:#101010}
 .hidden{display:none!important}
 .serif{font-family:var(--serif)}
@@ -326,9 +326,9 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .mbase::after{content:"";position:absolute;right:7px;top:6px;width:6px;height:6px;border-radius:50%;
  background:radial-gradient(circle at 40% 30%,#f6e27a,#7a5c17);box-shadow:0 1px 2px rgba(0,0,0,.8)}
 .mlabel{font-size:8px;color:var(--muted);letter-spacing:.12em;margin-top:11px;text-align:center;max-width:150px}
-.m3d-shadow{position:absolute;bottom:-13px;left:-9%;right:-26%;height:20px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.82),transparent 70%);filter:blur(5px);z-index:-2}
-@media (max-width:920px){.stage-row{flex-wrap:wrap;gap:1.6rem}.stage3d{transform:scale(.86);margin-top:-.4rem}}
-@media (max-width:500px){.stage3d{transform:scale(.68);margin-top:-1.4rem;margin-bottom:-1rem}}
+@media (max-width:920px){.stage-row{flex-wrap:wrap;gap:1.6rem}.stage3d{transform:scale(.86);transform-origin:center top;margin-top:-.4rem}}
+@media (max-width:500px){.stage3d{transform:scale(.72);transform-origin:center top;margin-top:-1.2rem;margin-bottom:-1.2rem}.m3d-row{gap:clamp(1rem,2vw,1.8rem)}}
+@media (max-width:380px){.stage3d{transform:scale(.64);transform-origin:center top;margin-top:-1.8rem;margin-bottom:-1.8rem}}
 
 /* Canlı kazanç şeridi (live ticker) */
 #ticker{position:fixed;left:0;right:0;bottom:0;z-index:35;height:34px;overflow:hidden;
@@ -554,6 +554,20 @@ body.tick footer{padding-bottom:34px}
     padding:1.1rem;gap:1rem;border-bottom:1px solid var(--line)}
   #burger{display:inline-flex!important}
   .chat-panel-fs{height:calc(100vh - 8rem)}
+}
+@media (max-width:560px){
+  nav{padding:.65rem .8rem;gap:.5rem}
+  .nav-right{gap:.35rem}
+  #vaultNavBtn{display:none}
+  .hc{padding:.3rem .55rem;font-size:.66rem}
+  .ovl{padding:.4rem}
+  .pnl{padding:1.25rem 1rem;border-radius:12px}
+  .slot-head{flex-direction:column;gap:.4rem}
+  .gate-form{gap:.5rem}
+  .gate-form .inp{width:100%;max-width:240px}
+}
+@media (max-width:768px){
+  .inp, select.inp, textarea.inp{font-size:16px!important}
 }
 /* ---- Kulüp Kasası (Vault) ---- */
 .vault-pnl{width:min(540px,96vw);max-height:88vh;overflow-y:auto}
@@ -2442,6 +2456,11 @@ function renderMachines(){
       el.style.transform = 'translateY(' + M_ALIGN + 'px)';
     });
     $('lv-' + m.id).onclick = () => mspin(m.id);
+    const mElem = $('m3d-' + m.id);
+    if(mElem){
+      mElem.style.cursor = 'pointer';
+      mElem.onclick = (e) => { if(!e.target.closest('.mlever')) mspin(m.id); };
+    }
   });
   const ball = $('rlBall');
   if(ball) ball.style.transform = 'translate(-50%,-50%) rotate(35deg) translateX(82px)';
