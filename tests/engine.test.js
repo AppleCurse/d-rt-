@@ -61,7 +61,7 @@ globalThis.setTimeout = () => 0; globalThis.setInterval = () => 0; globalThis.cl
 
 /* ---------- 3) Uygulamayı bu bağlamda çalıştır ---------- */
 const run = new Function('document', 'window', 'localStorage', 'navigator', 'performance', 'requestAnimationFrame', 'cancelAnimationFrame', 'IntersectionObserver', 'MutationObserver', 'fetch', 'AudioContext', 'webkitAudioContext',
-  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound }');
+  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null }');
 let app;
 try {
   app = run(document, window, localStorage, navigator, performance, requestAnimationFrame, cancelAnimationFrame, IntersectionObserver, MutationObserver, fetch, ACStub, ACStub);
@@ -159,6 +159,19 @@ console.log('\n📜 Tur geçmişi:');
   const h = ST().hist;
   T('80 turda sınanır (şişmez)', h.length === 80, `boy ${h.length}`);
   T('En yeni en başta', h[0].win === 20 && h[1].win === 0, `h0=${h[0].win} h1=${h[1].win}`);
+}
+
+
+/* ---------- 8.5) MINES — adil çarpan matrisi ---------- */
+console.log('\n💣 Mines:');
+{
+  const M = app.minesMul;
+  T('İlk elmas: 3 mayında ~1.10× başlar', Math.abs(M(3,1) - 1.10) < 0.02, 'geç: ' + M(3,1));
+  let mono = true, prev = 0;
+  for(let k = 1; k <= 22; k++){ const v = M(3,k); if(v <= prev) mono = false; prev = v; }
+  T('Çarpan artan eldizilim (3 mayın, 22 güvenli)', mono);
+  T('1 mayında tüm tarla: son ~24.25×', Math.abs(M(1,24) - 0.97*25) < 0.6, 'geç: ' + M(1,24));
+  T('20 mayında 4 güvenli karoda yüklü çarpan', M(20,4) > 5, 'geç: ' + M(20,4).toFixed(2));
 }
 
 /* ---------- 9) Sonuç ---------- */

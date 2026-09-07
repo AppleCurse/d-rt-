@@ -329,6 +329,20 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 @media (max-width:820px){.stage3d{transform:scale(.78);margin-top:-.6rem}}
 @media (max-width:440px){.stage3d{transform:scale(.62);margin-top:-1.6rem;margin-bottom:-1rem}}
 
+/* Canlı kazanç şeridi (live ticker) */
+#ticker{position:fixed;left:0;right:0;bottom:0;z-index:35;height:34px;overflow:hidden;
+ background:linear-gradient(180deg,rgba(14,13,11,.94),rgba(10,10,10,.96));border-top:1px solid rgba(212,175,55,.25);
+ backdrop-filter:blur(10px);display:none}
+body.tick #ticker{display:block}
+body.tick footer{padding-bottom:34px}
+.ticker-track{display:inline-flex;gap:2.6rem;align-items:center;height:100%;padding-left:100%;white-space:nowrap;
+ animation:tickmove 46s linear infinite}
+#ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes tickmove{to{transform:translateX(-100%)}}
+.tick-item{font-size:.62rem;letter-spacing:.1em;color:var(--muted)}
+.tick-item b{color:var(--gold);font-weight:600}
+.tick-item .tu{color:var(--gold2)}
+
 /* Kapı melekleri */
 .gate-angels{margin-top:1.2rem;position:relative;z-index:2;width:100%}
 .ga-row{display:flex;justify-content:center;gap:.9rem;flex-wrap:wrap;margin-top:.8rem}
@@ -460,6 +474,25 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .hrow b{font-family:var(--serif);font-weight:600}
 .hrow .hw{color:var(--gold)} .hrow .hl{color:var(--red)}
 .hrow .hx{color:var(--muted);font-size:.6rem;letter-spacing:.06em}
+/* Mines */
+.mn-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:1rem 0 .4rem}
+.mtile{position:relative;aspect-ratio:1;border-radius:10px;cursor:pointer;border:1px solid rgba(212,175,55,.22);
+ background:linear-gradient(150deg,#1b1710,#0f0c07 70%);display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+ transition:all .25s;box-shadow:inset 0 2px 6px rgba(0,0,0,.5)}
+.mtile:hover:not(:disabled){border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.5)}
+.mtile:disabled{cursor:default}
+.mtile.safe{background:radial-gradient(circle at 50% 40%,rgba(212,175,55,.28),rgba(14,12,7,.9));border-color:var(--gold);
+ box-shadow:0 0 16px rgba(212,175,55,.35);animation:mtIn .3s ease}
+.mtile.mine{background:radial-gradient(circle at 50% 40%,rgba(190,40,40,.5),rgba(20,6,6,.95));color:#ff6d5e;
+ box-shadow:0 0 18px rgba(200,50,40,.4);animation:mtIn .3s ease}
+.mtile.shown-mine{opacity:.55}
+@keyframes mtIn{from{transform:scale(.7);opacity:.2}}
+.mn-bar{display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:.4rem}
+.mn-bar select{width:auto;font-size:.72rem;padding:.35rem .5rem}
+.mn-stat{display:flex;justify-content:space-around;gap:.6rem;margin:.55rem 0;text-align:center}
+.mn-stat b{display:block;font-family:var(--serif);color:var(--gold2);font-size:1.1rem}
+.mn-stat small{font-size:.56rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+
 /* Masa oyunları */
 .bj-felt{background:radial-gradient(ellipse at 50% 0,rgba(30,90,50,.5),transparent 72%),linear-gradient(180deg,#0f2b1a,#0a1d11);
  border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:1rem .8rem .9rem;margin:.9rem 0 .7rem;position:relative;
@@ -974,6 +1007,37 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
   </div>
 </div>
 
+<div id="ovlMines" class="ovl hidden" onclick="ovlSelfClose(event,this)">
+  <div class="pnl" style="width:min(480px,100%)">
+    <button class="close" onclick="closeOvl('ovlMines');mnQuit()">✕</button>
+    <span class="tag">💣 Adrenalin</span>
+    <h3>Mines</h3>
+    <p class="noteline">Elmasları topladıkça çarpan katlanır. Ne zaman istersen <b>Kasaya Gir</b> — mayın, geride kalanların hepsini yutar.</p>
+    <div class="mn-stat">
+      <div><b id="mnMul">1.00×</b><small>çarpan</small></div>
+      <div><b id="mnNext">—</b><small>bir sonraki</small></div>
+      <div><b id="mnSafe">0</b><small>güvenli karo</small></div>
+      <div><b id="mnCash">—</b><small>şu an tahsilat</small></div>
+    </div>
+    <div class="mn-grid" id="mnGrid"></div>
+    <div class="bj-msg" id="mnMsg">Bahis ve mayın sayısını seç, tarfayı başlat.</div>
+    <div class="chiprow" id="mnChips"></div>
+    <div class="mn-bar">
+      <select class="inp" id="mnCount">
+        <option value="1">💣 1 mayın</option>
+        <option value="3" selected>💣 3 mayın</option>
+        <option value="5">💣 5 mayın</option>
+        <option value="10">💣 10 mayın</option>
+        <option value="15">💣 15 mayın</option>
+        <option value="20">💣 20 mayın</option>
+      </select>
+      <button class="btn solid" id="mnStart" onclick="mnStart()">TARLAYI BAŞLAT</button>
+      <button class="btn solid hidden" id="mnCashBtn" onclick="mnCash()">KASAYA GİR</button>
+    </div>
+    <div class="slot-foot"><span class="muted">Çarpanlar gerçek kombinatorik — ev payı %3</span><span class="muted" id="mnBal"></span></div>
+  </div>
+</div>
+
 <div id="ovlRou" class="ovl hidden" onclick="ovlSelfClose(event,this)">
   <div class="pnl" style="width:min(600px,100%)">
     <button class="close" onclick="closeOvl('ovlRou')">✕</button>
@@ -1324,6 +1388,8 @@ const GAMES = [
   note:'Tek masa, özel krupiye — stratejist profiline ayrıldı.'},
  {id:'rl', icon:'🎡', name:'Tek Kişilik Rulet', cat:'strat', catL:'🎯 Stratejist', rtp:'97.30', vol:'Masa', type:'table',
   note:'Kalabalık yok, bekleme yok; masa sadece senin.'},
+ {id:'mines', icon:'💣', name:'Mines', cat:'adren', catL:'⚡ Adrenalin', rtp:'97.00', vol:'Tarla', type:'mines',
+  note:'5×5 tarla. Elmas buldukça çarpan katlanır — mayına basmadan kasaya gir.'},
 ];
 /* --- “Backend” simülasyon katmanı: gerçekte REST/WS endpoint’ler (bkz. TECH_NOTES) --- */
 const API = {
@@ -1424,6 +1490,7 @@ function esc(s){ const d=document.createElement('div'); d.textContent=s; return 
 let _ritualMsg = null;
 function enterApp(name, invited){
   state.entered = true;
+  setTimeout(tickerStart, 2600);
   const sv = loadDemo();
   cloudPull(true); // bulutta yeni kayıt varsa içeri girerken geri yükle
   if(invited){
@@ -1501,7 +1568,7 @@ function renderGames(filter){
         <div class="meta">RTP %${x.rtp} · ${x.vol}</div>
         <div class="note">“${x.note}”</div>
         <div style="margin-top:1rem"><span class="tag" style="letter-spacing:.2em">${x.type==='slot'?'Oyna →':x.type==='crash'?'Uç →':'Masaya git →'}</span></div>`;
-      c.onclick = () => x.type==='slot' ? openSlot(x.id) : x.type==='crash' ? openCrash() : openTable(x.id);
+      c.onclick = () => x.type==='slot' ? openSlot(x.id) : x.type==='crash' ? openCrash() : x.type==='mines' ? openMines() : openTable(x.id);
       g.appendChild(c);
     });
   });
@@ -3063,6 +3130,133 @@ function rouSettle(n, bet){
   saveDemo();
 }
 
+/* ================= MINES ================= */
+const MN = { bet: 25, mines: 3, playing: false, safe: 0, grid: [] };
+function mnMul(mines, k){
+  // adil çarpan = C(25,k) / C(25-mines,k), ev payı %3
+  if(k <= 0) return 1;
+  let num = 1, den = 1;
+  for(let i = 0; i < k; i++){
+    num *= (25 - i);
+    den *= (25 - mines - i);
+  }
+  return Math.max(1, Math.round((0.97 * num / den) * 100) / 100);
+}
+function mnBal(){ const b = $('mnBal'); if(b) b.textContent = 'Bakiye: ◈ ' + fmt(state.chips) + ' dürTL'; }
+function mnChipRow(){ chipRow('mnChips', MN.bet, 'mnChip'); }
+function mnChip(n){ MN.bet = n; chipRow('mnChips', n, 'mnChip'); }
+function mnOpen(){
+  openOvl('ovlMines');
+  MN.playing = false; MN.safe = 0; MN.grid = [];
+  $('mnStart').classList.remove('hidden');
+  $('mnCashBtn').classList.add('hidden');
+  $('mnCount').disabled = false;
+  $('mnMsg').className = 'bj-msg'; $('mnMsg').textContent = 'Bahis ve mayın sayısını seç, tarlayı başlat.';
+  mnChipRow(); mnStat(1, '—'); mnBal();
+  const g = $('mnGrid'); g.innerHTML = '';
+  for(let i = 0; i < 25; i++){
+    const t = document.createElement('button');
+    t.className = 'mtile'; t.id = 'mni-' + i; t.disabled = true;
+    t.onclick = () => mnPick(i);
+    g.appendChild(t);
+  }
+}
+function mnStat(cur, next){
+  $('mnMul').textContent = cur.toFixed(2) + '×';
+  $('mnNext').textContent = next;
+  $('mnSafe').textContent = MN.safe;
+  const cash = MN.playing ? Math.round(MN.bet * cur) : null;
+  $('mnCash').textContent = cash ? '◈ ' + fmt(cash) : '—';
+}
+function mnQuit(){ mnOpenCleanup(); }
+function mnOpenCleanup(){
+  if(MN.playing && MN.safe > 0) mnCash(true);   // tarla açıkken kapanırsa tahsilatı kaçırma
+  MN.playing = false;
+}
+function mnStart(){
+  if(MN.playing) return;
+  const bet = MN.bet;
+  MN.mines = +$('mnCount').value;
+  if(state.chips < bet){ toast('Yetersiz bakiye — fişi küçült.'); return; }
+  state.chips -= bet; renderChips(); mnBal();
+  st().wagered += bet; st().spins++;
+  MN.playing = true; MN.safe = 0;
+  MN.grid = Array(25).fill(false);
+  let placed = 0;
+  while(placed < MN.mines){ const i = Math.random()*25|0; if(!MN.grid[i]){ MN.grid[i] = true; placed++; } }
+  for(let i = 0; i < 25; i++){
+    const t = $('mni-' + i);
+    t.disabled = false; t.className = 'mtile'; t.textContent = '';
+  }
+  $('mnStart').classList.add('hidden');
+  $('mnCashBtn').classList.remove('hidden'); $('mnCashBtn').disabled = true; // ilk taştan önce çekilme olmaz
+  $('mnCount').disabled = true;
+  $('mnMsg').className = 'bj-msg'; $('mnMsg').textContent = 'Tarla canlı. Karoları aç — elmas bulursan çarpan büyür.';
+  tone(300, 0, .08, 'triangle', .09); buzz(10);
+  mnStat(1, '—'); saveDemo();
+}
+function mnPick(i){
+  if(!MN.playing) return;
+  const t = $('mni-' + i);
+  if(t.disabled && t.dataset.done) return;
+  if(t.dataset.done) return;
+  t.dataset.done = '1'; t.disabled = true;
+  if(MN.grid[i]){
+    // MAYIN
+    t.classList.add('mine'); t.textContent = '💣';
+    MN.playing = false;
+    crBoom && crBoom(); buzz([60, 50, 90]);
+    // geri kalan mayınları göster
+    MN.grid.forEach((isM, j) => {
+      const tj = $('mni-' + j);
+      if(isM && !tj.dataset.done){ tj.classList.add('mine', 'shown-mine'); tj.textContent = '💣'; tj.disabled = true; }
+      else { tj.disabled = true; }
+    });
+    $('mnMsg').className = 'bj-msg lose'; $('mnMsg').textContent = 'Mayın! Bahis tarlada kaldı: ◈ ' + fmt(MN.bet) + ' dürTL.';
+    $('mnStart').classList.remove('hidden'); $('mnCashBtn').classList.add('hidden'); $('mnCount').disabled = false;
+    logRound('Mines', MN.bet, 0);
+    saveDemo(); mnStat(mnMul(MN.mines, MN.safe), '—');
+    MN.safe = 0;
+    return;
+  }
+  // GÜVENLİ
+  t.classList.add('safe'); t.textContent = '💎';
+  MN.safe++;
+  const cur = mnMul(MN.mines, MN.safe);
+  const next = MN.safe < (25 - MN.mines) ? mnMul(MN.mines, MN.safe + 1).toFixed(2) + '×' : 'MAX';
+  mnStat(cur, next);
+  $('mnCashBtn').disabled = false;
+  tone(500 + MN.safe * 40, 0, .07, 'triangle', .09); buzz(8);
+  const left = 25 - MN.mines - MN.safe;
+  $('mnMsg').textContent = MN.safe + '. elmas! ' + cur.toFixed(2) + '× → ' + (next === 'MAX' ? 'sona geldin!' : 'bir sonraki ' + next) + (left > 0 ? ' · tarlada ' + left + ' güvenli karo var.' : '');
+  if(left === 0) mnCash();
+}
+function mnCash(silent){
+  if(!MN.playing) return;
+  MN.playing = false;
+  const cur = mnMul(MN.mines, MN.safe);
+  const win = Math.round(MN.bet * cur);
+  state.chips += win; renderChips(); mnBal();
+  st().won += win; st().big = Math.max(st().big, win - MN.bet);
+  logRound('Mines', MN.bet, win, cur);
+  if(typeof addLedgerEntry === 'function' && win - MN.bet >= 100) addLedgerEntry('Mines Tahsilatı', win - MN.bet, cur.toFixed(2) + '× · ' + MN.safe + ' elmas', 'ok');
+  // tüm tarlayı çöz
+  MN.grid.forEach((isM, j) => {
+    const tj = $('mni-' + j);
+    tj.disabled = true;
+    if(isM){ tj.classList.add('mine', 'shown-mine'); tj.textContent = '💣'; }
+    else if(!tj.dataset.done){ tj.textContent = '💎'; tj.classList.add('safe', 'shown-mine'); tj.style.opacity = '.4'; }
+  });
+  tone(700, 0, .1, 'triangle', .11); tone(1050, .08, .16, 'triangle', .11); buzz([25, 40, 25]);
+  if(!silent){
+    $('mnMsg').className = 'bj-msg win';
+    $('mnMsg').textContent = 'Kasada! ' + MN.safe + ' elmas · ' + cur.toFixed(2) + '× → ◈ +' + fmt(win - MN.bet) + ' dürTL kâr.';
+  }
+  $('mnStart').classList.remove('hidden'); $('mnCashBtn').classList.add('hidden'); $('mnCount').disabled = false;
+  if(typeof vaultWageringTick === 'function') vaultWageringTick(MN.bet);
+  saveDemo(); giftWin();
+}
+
 /* ================= SUPABASE: hesap + bulut kayıt + başvuru ================= */
 /* ── AYAR: Supabase proje URL ve anon public key buraya yapıştırılınca
       hesap sistemi otomatik devreye girer; boş kalırsa site localStorage
@@ -3179,6 +3373,43 @@ async function cloudApply(name, why){
 function logRound(game, bet, win, mul){
   st().hist.unshift({ ts: Date.now(), game, bet, win, mul: mul || null });
   if(st().hist.length > 80) st().hist.length = 80;
+  if(win > 0 && typeof tickPush === 'function') tickPush(state.name, game, win, mul, true);
+}
+
+/* ================= CANLI KAZANÇ ŞERİDİ ================= */
+const TICK_NAMES = ['Kaan S.','Emre','Bora T.','Selin A.','Mert K.','Zeynep Ö.','Onur D.','Ece Y.','Deniz Ç.','Yusuf A.','İpek V.','Baran T.'];
+const TICK_GAMES = ['Gates of Olympus','Sweet Bonanza','Aviator','Türkçe Blackjack','Money Train 4','Tek Kişilik Rulet','Wanted Dead or a Wild','Mines','Starlight Princess','Blood Suckers'];
+const tickQueue = [];
+let tickIv = null, tickFilled = false;
+function tickPush(who, game, amt, mul, mine){
+  tickQueue.push({ who: mine ? ((who||'Sen')) : who, game, amt, mul });
+  if(tickQueue.length > 30) tickQueue.shift();
+}
+function tickGen(){
+  if(Math.random() < .72){
+    const g = TICK_GAMES[Math.random()*TICK_GAMES.length | 0];
+    const mul = g === 'Aviator' ? (1.2 + Math.random()*8) : null;
+    const base = [120, 250, 400, 750, 1200, 2400, 4800, 8400];
+    let amt = base[Math.random()*base.length | 0];
+    if(mul) amt = Math.round((50 + Math.random()*450) * mul / 10) * 10;
+    tickPush(TICK_NAMES[Math.random()*TICK_NAMES.length | 0], g, amt, mul, false);
+  }
+}
+function tickRender(){
+  const tr = $('tickerTrack'); if(!tr) return;
+  if(tickQueue.length < 8) tickGen();
+  const items = tickQueue.filter(Boolean);
+  if(!items.length) return;
+  tr.innerHTML = items.map(t =>
+    '<span class="tick-item">◆ <b>' + esc(t.who) + '</b> · ' + esc(t.game) + (t.mul ? ' <span class="tu">' + t.mul.toFixed(2) + '×</span>' : '') + ' · <b>◈ +' + fmt(t.amt) + ' dürTL</b></span>'
+  ).join('');
+}
+function tickerStart(){
+  if(tickIv || !state.entered) return;
+  document.body.classList.add('tick');
+  for(let i = 0; i < 10; i++) tickGen();
+  tickRender();
+  tickIv = setInterval(tickRender, 9000);
 }
 
 /* ================= DÜRTÜ RAPORU ================= */
@@ -3584,5 +3815,6 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+  <div id="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
 </body>
 </html>
