@@ -1,0 +1,38 @@
+name: Build DÜRTÜ Desktop App (Pake)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build-desktop.yml'
+      - 'durtu/**'
+      - 'durtu-app/**'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build DÜRTÜ Desktop App via Pake
+        run: |
+          npx pake-cli https://d-rt.vercel.app --name Durtu --title "DÜRTÜ — Kapalı Kulüp" --width 1280 --height 850 --dark-mode --show-system-tray
+
+      - name: Upload Windows Executable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Durtu-Windows-App
+          path: |
+            *.exe
+            *.msi
