@@ -447,6 +447,7 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .tcell{background:#0d0d0c;border:1px solid var(--line);border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.15rem;transition:all .2s}
 .tcell.gold{border-color:var(--gold);box-shadow:0 0 12px rgba(212,175,55,.35);transform:scale(1.05)}
 
+.auth-err{color:var(--red);font-size:.68rem;margin:.45rem 0 .2rem}
 .stat-rows{margin:.4rem 0}
 .stat-row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.5rem .1rem;border-bottom:1px dashed rgba(212,175,55,.12);font-size:.74rem;color:var(--muted)}
 .stat-row b{font-family:var(--serif);color:var(--gold);font-weight:600;font-size:.86rem}
@@ -526,6 +527,7 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
     </div>
     <div class="nav-right">
       <span class="hc">◈ <span class="chipsVal">1.000</span> dürTL</span>
+      <button class="icon-btn" id="acctBtn" title="Hesap — bakiyeni bulutla taşı" onclick="openAuth()">☻</button>
       <button class="icon-btn" id="ambBtn" title="Salon ambiyansı">♪</button>
       <div class="avatar" id="avatarInit" onclick="openStats()" title="Dürtü Raporun" style="cursor:pointer">E</div>
     </div>
@@ -729,6 +731,27 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
     </div>
     <p class="serif" id="stVerdict" style="font-style:italic;color:var(--muted);margin-top:1rem;text-align:center;line-height:1.7"></p>
     <button class="btn solid" style="width:100%" onclick="closeOvl('ovlStats')">Anlaşıldı</button>
+  </div>
+</div>
+
+<div id="ovlAuth" class="ovl hidden" onclick="ovlSelfClose(event,this)">
+  <div class="pnl" style="width:min(420px,100%)">
+    <button class="close" onclick="closeOvl('ovlAuth')">✕</button>
+    <span class="tag">◈ Üyelik</span>
+    <h3 id="authTitle">Giriş yap</h3>
+    <div id="authFormBox">
+      <p class="noteline">Bakiyen, Dürtü Raporun ve davet kodların bulutta dursun: cihaz değişsen de seninle gelsin.</p>
+      <input class="inp" id="auMail" type="email" placeholder="E-posta" autocomplete="email" style="margin-bottom:.6rem">
+      <input class="inp" id="auPass" type="password" placeholder="Şifre (en az 6 karakter)" autocomplete="current-password">
+      <p class="auth-err hidden" id="auErr"></p>
+      <button class="btn solid" id="auGo" style="width:100%" onclick="authGo()">GİRİŞ YAP</button>
+      <button class="btn" style="width:100%;margin-top:.5rem;justify-content:center;display:flex" onclick="authToggle()"><span id="auAlt">Hesabın yok mu? Kayıt ol</span></button>
+    </div>
+    <div id="authInBox" class="hidden">
+      <p class="noteline">Buluta bağlısın: <b id="auWho" style="color:var(--gold)">—</b><br>Her kazanç/kayıp otomatik kendiliğinden yedekleniyor.</p>
+      <button class="btn solid" style="width:100%" onclick="cloudPull(true).then(()=>toast('☁️ Kayıt bulutla eşitlendi.'))">ŞİMDİ EŞİTLE</button>
+      <button class="btn" style="width:100%;margin-top:.5rem;display:flex;justify-content:center" onclick="authOut()">Çıkış yap</button>
+    </div>
   </div>
 </div>
 
@@ -981,7 +1004,12 @@ const API = {
 };
 /* --- yerel kalıcılık (hesap cüzdanı simülasyonu) --- */
 const SAVE_KEY = 'durtu_demo_v1';
-function saveDemo(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({ chips: state.chips, name: state.name, best: (typeof CR !== 'undefined' && CR.best) || 0, invites: state.invites, codes: state.codes || [], lastDay: new Date().toDateString(), streakDays: state.streakDays || 0, stats: state.stats })); }catch(e){} }
+function snapshot(){
+  return { chips: state.chips, name: state.name, best: (typeof CR !== 'undefined' && CR.best) || 0,
+    invites: state.invites, codes: state.codes || [], lastDay: new Date().toDateString(),
+    streakDays: state.streakDays || 0, stats: state.stats };
+}
+function saveDemo(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); }catch(e){} cloudPush(); }
 function loadDemo(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); }catch(e){ return null; } }
 function resetDemo(e){ if(e) e.preventDefault(); try{ localStorage.removeItem(SAVE_KEY); }catch(_){}; toast('Demo verileri sıfırlandı. Dürtü affeder ama unutmaz.'); }
 
@@ -1035,6 +1063,7 @@ function submitApply(){
     const apps = JSON.parse(localStorage.getItem('durtu_apps') || '[]');
     apps.push({ id:'A' + Date.now().toString(36).toUpperCase(), name, why, type: $('apType').value, budget: $('apBudget').value, ts: Date.now(), status:'pending' });
     localStorage.setItem('durtu_apps', JSON.stringify(apps));
+    cloudApply(name, why);;
   }catch(e){}
   $('applyForm').classList.add('hidden');
   $('applyWait').classList.remove('hidden');
@@ -1058,6 +1087,7 @@ let _ritualMsg = null;
 function enterApp(name, invited){
   state.entered = true;
   const sv = loadDemo();
+  cloudPull(true); // bulutta yeni kayıt varsa içeri girerken geri yükle
   if(invited){
     state.name = name;
     state.chips = 1000 + lobby + 250;
@@ -2386,6 +2416,119 @@ function tournFinish(){
   $('tournVerdict').textContent = verdicts[rank] || ('Sıralama: #' + rank + ' · Ödül bu sefer başkasına. Nefes al; Çarşamba her hafta gelir.');
   if(prize) toast('🎯 <b>Turnuva ödülü:</b> +' + fmt(prize) + ' dürTL — skorun: ' + fmt(TOURN.score));
   else toast('🎯 Turnuva bitti — #' + rank + '. Skorun: ' + fmt(TOURN.score));
+}
+
+/* ================= SUPABASE: hesap + bulut kayıt + başvuru ================= */
+/* ── AYAR: Supabase proje URL ve anon public key buraya yapıştırılınca
+      hesap sistemi otomatik devreye girer; boş kalırsa site localStorage
+      demosu olarak çalışmaya devam eder (ağsız, güvenli geri düşüş). ── */
+const SUPA_URL  = '';   // örn. https://abcdefgh.supabase.co
+const SUPA_ANON = '';   // anon public key
+function supaEnabled(){ return SUPA_URL.length > 10 && SUPA_ANON.length > 20; }
+
+const SUPA = { sess: null };
+try{ SUPA.sess = JSON.parse(localStorage.getItem('durtu_supa') || 'null'); }catch(e){ SUPA.sess = null; }
+
+async function supaReq(path, opt){
+  opt = opt || {};
+  const h = { 'apikey': SUPA_ANON, 'Content-Type': 'application/json' };
+  const tok = opt.token || (SUPA.sess && SUPA.sess.access_token) || SUPA_ANON;
+  h['Authorization'] = 'Bearer ' + tok;
+  if(opt.prefer) h['Prefer'] = opt.prefer;
+  const res = await fetch(SUPA_URL + path, { method: opt.method || 'GET', headers: h, body: opt.body ? JSON.stringify(opt.body) : null });
+  let data = null; try{ data = await res.json(); }catch(e){}
+  if(!res.ok){ const err = (data && (data.msg || data.message || data.error_description)) || ('Supabase ' + res.status); throw new Error(err); }
+  return data;
+}
+
+/* — Hesap durumu/modali — */
+let authMode = 'in';
+function openAuth(){
+  if(!supaEnabled()){ toast('☁️ <b>Bulut sistemi hazır değil.</b> Kurucu ayarı bekleniyor (Supabase anahtarları).'); return; }
+  const inS = !!SUPA.sess;
+  $('authFormBox').classList.toggle('hidden', inS);
+  $('authInBox').classList.toggle('hidden', !inS);
+  if(inS) $('auWho').textContent = SUPA.sess.user.email;
+  openOvl('ovlAuth');
+}
+function authToggle(){
+  authMode = (authMode === 'in') ? 'up' : 'in';
+  $('auGo').textContent = authMode === 'in' ? 'GİRİŞ YAP' : 'KAYIT OL';
+  $('auAlt').textContent = authMode === 'in' ? 'Hesabın yok mu? Kayıt ol' : 'Zaten üyeyim, giriş yap';
+  auHideErr();
+}
+function auShowErr(t){ const e = $('auErr'); e.textContent = t; e.classList.remove('hidden'); }
+function auHideErr(){ const e = $('auErr'); e.classList.add('hidden'); }
+async function authGo(){
+  auHideErr();
+  const email = $('auMail').value.trim(), pass = $('auPass').value;
+  if(!/\S+@\S+\.\S+/.test(email)) return auShowErr('Geçerli bir e-posta gir.');
+  if(pass.length < 6) return auShowErr('Şifre en az 6 karakter.');
+  $('auGo').textContent = '…';
+  try{
+    const d = await supaReq(authMode === 'in' ? '/auth/v1/token?grant_type=password' : '/auth/v1/signup', { method:'POST', body:{ email, password: pass }, token: SUPA_ANON });
+    if(d.access_token){
+      sessSet({ access_token: d.access_token, refresh_token: d.refresh_token, user: d.user });
+      closeOvl('ovlAuth');
+      toast(authMode === 'in' ? '🎩 <b>Tekrar hoş geldin.</b> Bulut kaydın yükleniyor…' : '✦ <b>Üyeliğin açıldı.</b> Artık bakiyen bulutta güvende.');
+      cloudPull(true);
+    } else {
+      auShowErr((d.msg || d.error_description || 'Giriş yapılamadı.') + (authMode === 'up' ? ' (E-posta doğrulaması gerekiyor olabilir.)' : ''));
+    }
+  }catch(e){ auShowErr(e.message); }
+  $('auGo').textContent = authMode === 'in' ? 'GİRİŞ YAP' : 'KAYIT OL';
+}
+function authOut(){ sessSet(null); closeOvl('ovlAuth'); toast('Çıkış yapıldı — burada bekleriz.'); }
+function sessSet(sv2){
+  SUPA.sess = sv2;
+  try{ sv2 ? localStorage.setItem('durtu_supa', JSON.stringify(sv2)) : localStorage.removeItem('durtu_supa'); }catch(e){}
+  const b = $('acctBtn');
+  if(b){ b.style.color = sv2 ? 'var(--gold)' : ''; b.title = sv2 ? ('Buluta bağlı: ' + sv2.user.email) : 'Hesap — bakiyeni bulutla taşı'; }
+}
+
+/* — Bulut ↔ oyun kaydı — */
+let cloudT = null;
+function cloudPush(){
+  if(!supaEnabled() || !SUPA.sess) return;
+  clearTimeout(cloudT);
+  cloudT = setTimeout(async () => {
+    try{
+      await supaReq('/rest/v1/profiles', { method:'POST',
+        body: { user_id: SUPA.sess.user.id, data: snapshot(), updated_at: new Date().toISOString() },
+        prefer: 'return=minimal,resolution=merge-duplicates' });
+    }catch(e){ /* sessin süresi dolmuş olabilir; sessiz geç */ }
+  }, 1600);
+}
+async function cloudPull(applyNow){
+  if(!supaEnabled() || !SUPA.sess) return null;
+  try{
+    const rows = await supaReq('/rest/v1/profiles?user_id=eq.' + SUPA.sess.user.id + '&select=data');
+    const d = rows && rows[0] && rows[0].data;
+    if(d && applyNow){
+      if(typeof d.chips === 'number' && d.chips >= 0) state.chips = d.chips;
+      if(d.stats) state.stats = d.stats;
+      if(typeof d.invites === 'number') state.invites = d.invites;
+      if(Array.isArray(d.codes)) state.codes = d.codes;
+      if(typeof d.streakDays === 'number') state.streakDays = d.streakDays;
+      if(d.best && typeof CR !== 'undefined') CR.best = d.best;
+      if(d.name) state.name = d.name;
+      saveDemo(); renderChips();
+      const avEl = $('avatarInit');
+      if(avEl && state.name) avEl.textContent = state.name.charAt(0).toUpperCase();
+    }
+    return d || null;
+  }catch(e){ return null; }
+}
+
+/* — Başvurular: gerçek kuyruk — */
+async function cloudApply(name, why){
+  if(!supaEnabled()) return;
+  try{
+    await supaReq('/rest/v1/applications', { method:'POST',
+      body: { name, why, type: $('apType').value, budget: $('apBudget').value,
+              user_id: (SUPA.sess && SUPA.sess.user.id) || null },
+      prefer: 'return=minimal' });
+  }catch(e){ /* yerel kopya zaten alındı */ }
 }
 
 /* ================= DÜRTÜ RAPORU ================= */
