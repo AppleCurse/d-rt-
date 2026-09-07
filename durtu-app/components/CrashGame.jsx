@@ -2,6 +2,7 @@
 // Aviator — canvas uçuş + canlı sofa (prototip paritesi)
 import { useEffect, useRef, useState } from 'react';
 import { say, fmt, buzz } from '../lib/toast';
+import { logRound } from '../lib/store';
 
 const CRW = 660, CRH = 330;
 const NAMES = ['M*** K***','A*** Y***','S*** D***','E*** T***','B*** Ö***','H*** Ç***','Z*** A***','K*** Ş***','N*** V***','T*** G***'];
@@ -161,10 +162,15 @@ export default function CrashGame({ spend, win, onClose }){
   }
   function doCash(auto){
     const e = E.current;
-    if(!e.running || e.cashed) return;
+    if(e.cashed) return;
+    if(!e.running){
+      if(!auto){ say('Tur çoktan bitti — top düştükten sonra çıkış olmaz.'); }
+      return;
+    }
     e.cashed = true;
     const m = e.m, w = Math.round(e.bet * m);
     win(w);
+    logRound('Aviator', e.bet, w, Math.round(m * 100) / 100);
     tone(523, 0, .15, 'triangle', .12); tone(784, .1, .25, 'triangle', .12); buzz([30, 45, 75]);
     bestsRef.current = Math.max(bestsRef.current, m);
     setCanCash(false);
@@ -180,6 +186,7 @@ export default function CrashGame({ spend, win, onClose }){
     setHist(h => [e.crash.toFixed(2) + '×', ...h].slice(0, 6));
     setBoom('💥 UÇTU · ' + e.crash.toFixed(2) + '×');
     draw((performance.now() - e.t0) / 1000, true);
+    if(!e.cashed) logRound('Aviator', e.bet, 0, Math.round(e.crash * 100) / 100);
     setMyMsg(e.cashed
       ? 'Uçak ' + e.crash.toFixed(2) + '× noktasında düştü — sen çoktan inmiştin. Dürtü bunu not etti.'
       : 'Uçak ' + e.crash.toFixed(2) + '× noktasında düştü. Bahis sofaya kaldı — nefes al, yeni tur geliyor.');

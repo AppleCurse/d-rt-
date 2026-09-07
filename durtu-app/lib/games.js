@@ -16,8 +16,10 @@ export const GAMES = [
     note: 'Seçkideki tek crash oyunu — Dürtü bilinçli seçti.' },
   { id: 'bj', icon: '🂡', name: 'Türkçe Blackjack', cat: 'strat', rtp: '99.40', vol: 'Masa', type: 'table',
     note: 'Tek masa, özel krupiye — stratejist profiline ayrıldı.' },
-  { id: 'rl', icon: '🎡', name: 'Tek Kişilik Rulet', cat: 'strat', rtp: '97.30', vol: 'Masa', type: 'table',
+  { id: 'rl', icon: '🎡', name: 'Tek Kişilik Rulet', cat: 'strat', rtp: '97.30', vol: 'Masa', type: 'roulette',
     note: 'Kalabalık yok, bekleme yok; masa sadece senin.' },
+  { id: 'mines', icon: '💣', name: 'Mines', cat: 'adren', rtp: '97.00', vol: 'Tarla', type: 'mines',
+    note: '5×5 tarla — elmas topla, mayına basmadan kasaya gir.' },
 ];
 
 export const CATS = [

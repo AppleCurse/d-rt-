@@ -4,6 +4,7 @@
 // ücretsiz dönüş (×2, birikimli imza çarpanı) · çarpan orbları · WebAudio sfx
 import { useEffect, useRef, useState } from 'react';
 import { say, fmt, buzz } from '../lib/toast';
+import { logRound } from '../lib/store';
 
 const THEMES = {
   gates: { bg1: '#241145', bg2: '#0b0518', glow: '#a78bfa', syms: ['👑', '⚡', '💍', '🏺', '💎', '🔮'] },
@@ -44,6 +45,7 @@ export default function SlotGame({ game, spend, win, onClose }) {
   const [sfx, setSfx] = useState(true);
   const [ptOpen, setPtOpen] = useState(false);
   const betRef = useRef(25);
+  const [betUI, setBetUI] = useState(25);
   const hud = useRef({}); // {winAmt, slotMsg, spinBtn, winHud, fsBanner, bigWin, stage}
 
   const theme = THEMES[game.id] || THEMES.gates;
@@ -273,6 +275,7 @@ export default function SlotGame({ game, spend, win, onClose }) {
       const mult = total / E.bet;
       if (total > 0) {
         win(total);
+        if (E.fsMul === 1) logRound(game.name, E.bet, total, Math.round((total / E.bet) * 100) / 100);
         E.winTarget = total;
         hudEls.winHud?.classList.add('hot');
         const mid = E.lines[0];
@@ -292,6 +295,7 @@ export default function SlotGame({ game, spend, win, onClose }) {
           buzz([40, 55, 40, 55, 150]);
         }
       } else if (hudEls.slotMsg) {
+      if (total === 0 && E.fsMul === 1) logRound(game.name, E.bet, 0, null);
         hudEls.slotMsg.textContent = ['Bu tur olmadı. Dürtü sabırlı olanı sever.', 'Isınıyor…', 'Şeritler seni duyuyor, bir tur daha?'][Math.random() * 3 | 0];
       }
       if (fsTrig) say('✨ <b>Scatter!</b> 8 ücretsiz dönüş kazandın (tüm kazançlar ×2).');
@@ -341,6 +345,19 @@ export default function SlotGame({ game, spend, win, onClose }) {
       E.tickIv = setInterval(() => tone(1150, 0, .022, 'square', .02), 85);
     }
     E.spin = doSpin;
+    E.buy = () => {
+      if (!E.open || E.spinning) return;
+      if (E.fsPool > 0) { say('Zaten ücretsiz dönüştesin — önce turu bitir.'); return; }
+      const cost = betRef.current * 100;
+      if (!spend(cost)) { say('Bonus için ◈ ' + fmt(cost) + ' dürTL lazım. Bakiyen yetmiyor.'); return; }
+      logRound(game.name + ' · Bonus Satın Al', cost, 0, null);
+      E.fsAcc = 0; E.fsPool += 8; E.fsMul = 2;
+      sfxScatter(); buzz([30, 40, 30, 40, 80]);
+      say('⚡ <b>Bonus satın alındı:</b> 8 ücretsiz dönüş, biriken çarpanla aktif!');
+      updateFsBanner();
+      if (hud.current.spinBtn) hud.current.spinBtn.disabled = true;
+      setTimeout(() => { if (E.open && !E.spinning) doSpin(); }, 650);
+    };
 
     function loop(t) {
       if (!E.open) return;
@@ -423,7 +440,7 @@ export default function SlotGame({ game, spend, win, onClose }) {
 
         <div className="slot-hud">
           <div className="hud-box"><small>BAHİS</small>
-            <select className="hud-sel" defaultValue="25" onChange={e => betRef.current = +e.target.value}>
+            <select className="hud-sel" defaultValue="25" onChange={e => { betRef.current = +e.target.value; setBetUI(+e.target.value); }}>
               {[10, 25, 50, 100].map(v => <option key={v} value={v}>{v}</option>)}
             </select>
           </div>
@@ -432,6 +449,10 @@ export default function SlotGame({ game, spend, win, onClose }) {
           </div>
           <button className="btn solid spin-btn" ref={el => { hud.current.spinBtn = el; }}
             onClick={() => eng.current?.spin?.()}>DÖNDÜR</button>
+          <button className="btn spin-btn" onClick={() => eng.current?.buy?.()}
+            title="Bahsin ×100'ü karşılığında 8 ücretsiz dönüş + biriken çarpan garantisi">
+            ⚡ BONUS<span style={{ display: 'block', fontSize: '.6rem', opacity: .7, marginTop: '.15rem' }}>×100 = ◈ {(betUI * 100).toLocaleString('tr-TR')}</span>
+          </button>
         </div>
         <div className="slot-foot">
           <span className="muted" ref={el => { hud.current.slotMsg = el; }}>

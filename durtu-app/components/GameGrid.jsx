@@ -40,8 +40,7 @@ export default function GameGrid({ onPlay }) {
             ))
           : list.map(x => (
               <div className="gcard" key={x.id} onClick={() =>
-                x.type === 'table' ? say('🂡 <b>' + x.name + '</b> — masa deneyimi React yol haritasında.')
-                : onPlay(x.id)}>
+                onPlay(x.id)}>
                 <div className="ic">{x.icon}</div>
                 <h3>{x.name}</h3>
                 <div className="meta">RTP %{x.rtp} · {x.vol}</div>
