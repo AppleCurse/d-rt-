@@ -448,6 +448,48 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
 .tcell.gold{border-color:var(--gold);box-shadow:0 0 12px rgba(212,175,55,.35);transform:scale(1.05)}
 
 .auth-err{color:var(--red);font-size:.68rem;margin:.45rem 0 .2rem}
+/* Masa oyunları */
+.bj-felt{background:radial-gradient(ellipse at 50% 0,rgba(30,90,50,.5),transparent 72%),linear-gradient(180deg,#0f2b1a,#0a1d11);
+ border:1px solid rgba(212,175,55,.3);border-radius:14px;padding:1rem .8rem .9rem;margin:.9rem 0 .7rem;position:relative;
+ box-shadow:inset 0 2px 14px rgba(0,0,0,.55)}
+.bj-row{text-align:center;min-height:76px}
+.bj-lbl{font-size:.56rem;letter-spacing:.22em;color:rgba(244,238,220,.55);margin-bottom:.35rem}
+.bj-lbl span{color:var(--gold2)}
+.bj-hand{display:flex;justify-content:center;flex-wrap:wrap;gap:2px;min-height:64px}
+.dcc{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:44px;height:62px;border-radius:7px;margin:0 3px;
+ background:linear-gradient(160deg,#fbf6e7,#e9dfc6);color:#181410;font-family:var(--serif);font-weight:700;font-size:1.06rem;line-height:1;
+ box-shadow:0 3px 7px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.08);animation:cardIn .35s ease}
+.dcc i{font-size:.8rem;font-style:normal;margin-top:2px}
+.dcc.red{color:#a12020}
+.dcc.back{background:repeating-linear-gradient(45deg,#7a5c17 0 5px,#0f0c07 5px 10px);border:1px solid rgba(212,175,55,.7);box-shadow:0 3px 7px rgba(0,0,0,.6)}
+.dcc.win{box-shadow:0 0 16px rgba(212,175,55,.8),0 3px 7px rgba(0,0,0,.5)}
+@keyframes cardIn{from{transform:translateY(-16px) rotate(-5deg);opacity:0}}
+.bj-msg{text-align:center;font-family:var(--serif);font-style:italic;color:rgba(244,238,220,.85);font-size:.92rem;min-height:1.4em;margin:.55rem 0}
+.bj-msg.win{color:var(--gold2);font-style:normal;font-weight:600}
+.bj-msg.lose{color:var(--red)}
+.bj-btns{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.4rem}
+.chiprow{display:flex;gap:.5rem;justify-content:center;margin:.55rem 0 .2rem}
+.chipB{width:40px;height:40px;border-radius:50%;border:2px dashed rgba(212,175,55,.55);background:radial-gradient(circle at 35% 30%,#2a2113,#0f0c07);
+ color:var(--gold);font-family:var(--serif);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s}
+.chipB:hover{transform:translateY(-2px)}
+.chipB.on{background:radial-gradient(circle at 35% 30%,#f6e27a,#b8912c);color:#241a05;border-style:solid;border-color:#f6e27a;transform:translateY(-2px)}
+.rw{position:relative;width:200px;height:200px;margin:.6rem auto 0}
+.rw-disc{position:absolute;inset:0;border-radius:50%;border:6px solid #241b0d;transition:transform .1s linear;
+ box-shadow:0 12px 30px rgba(0,0,0,.7), inset 0 0 22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.4)}
+.rw-num{position:absolute;left:50%;top:50%;font-size:8px;letter-spacing:.02em;color:#f2e7c4;transform-origin:0 0;pointer-events:none}
+.rw-ball{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;z-index:3;pointer-events:none;
+ background:radial-gradient(circle at 35% 28%,#fff,#c9c4b4 68%,#8f8a7c);box-shadow:0 0 7px rgba(255,255,255,.8)}
+.rw-hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;z-index:2;
+ background:radial-gradient(circle at 38% 30%,#3a2c10,#0c0905);border:1px solid var(--gd);display:flex;align-items:center;justify-content:center;
+ color:var(--gold2);font-family:var(--serif);font-size:1.05rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.7)}
+.rw-pin{position:absolute;left:50%;top:-9px;transform:translateX(-50%);z-index:4;border:8px solid transparent;border-top-color:#f6e27a;filter:drop-shadow(0 3px 3px rgba(0,0,0,.65))}
+.rou-bets{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin-top:.5rem}
+.rou-bets .btn{font-size:.58rem;padding:.42rem .6rem}
+.rou-bets .btn.on{border-color:var(--gold2);color:var(--gold2);background:rgba(212,175,55,.12)}
+.rou-hist{display:flex;gap:.32rem;flex-wrap:wrap;justify-content:center;min-height:22px;margin-top:.4rem}
+.rchip{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:600;color:#fff;font-family:var(--serif)}
+.rchip.r{background:#8c1d1d}.rchip.b{background:#151310;border:1px solid #444}.rchip.g{background:#0e5c2e}
+
 .stat-rows{margin:.4rem 0}
 .stat-row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.5rem .1rem;border-bottom:1px dashed rgba(212,175,55,.12);font-size:.74rem;color:var(--muted)}
 .stat-row b{font-family:var(--serif);color:var(--gold);font-weight:600;font-size:.86rem}
@@ -857,6 +899,70 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
     <div class="masa"><div class="c" id="tableIcon">🂡</div></div>
     <p class="muted" style="font-size:.82rem;line-height:1.6">Masan hazırlanıyor. Krupiyen birazdan seni karşılayacak.<br>İstersen Selin süreci hızlandırsın.</p>
     <button class="btn solid" style="margin-top:1.2rem" onclick="closeOvl('ovlTable');openChat();botLine('table')">Selin’e yaz</button>
+  </div>
+</div>
+
+<div id="ovlBj" class="ovl hidden" onclick="ovlSelfClose(event,this)">
+  <div class="pnl" style="width:min(560px,100%)">
+    <button class="close" onclick="closeOvl('ovlBj');bjQuit()">✕</button>
+    <span class="tag">🂡 Masa 1 · Tek koltuk</span>
+    <h3>Türkçe Blackjack</h3>
+    <div class="bj-felt">
+      <div class="bj-row">
+        <div class="bj-lbl">KRUPİYE · <span id="bjDTot"></span></div>
+        <div class="bj-hand" id="bjDealer"></div>
+      </div>
+      <div class="bj-msg" id="bjMsg">Bahis yapıp “Dağıt”a bas.</div>
+      <div class="bj-row">
+        <div class="bj-lbl">SEN · <span id="bjPTot"></span></div>
+        <div class="bj-hand" id="bjPlayer"></div>
+      </div>
+    </div>
+    <div class="chiprow" id="bjChips"></div>
+    <div class="bj-btns" id="bjBtns">
+      <button class="btn solid" id="bjDeal" onclick="bjDeal()">DAĞIT</button>
+      <button class="btn hidden" id="bjHit" onclick="bjHit()">KART ÇEK</button>
+      <button class="btn hidden" id="bjStand" onclick="bjStand()">DUR</button>
+      <button class="btn hidden" id="bjDbl" onclick="bjDouble()">İKİYE KATLA ×2</button>
+      <button class="btn solid hidden" id="bjAgain" onclick="bjReset()">YENİ EL</button>
+    </div>
+    <div class="slot-foot"><span class="muted">Kurallar: krupiye 17'de durur · Blackjack 3:2 · ikiye katlama ilk hamlede</span><span class="muted" id="bjBal"></span></div>
+  </div>
+</div>
+
+<div id="ovlRou" class="ovl hidden" onclick="ovlSelfClose(event,this)">
+  <div class="pnl" style="width:min(600px,100%)">
+    <button class="close" onclick="closeOvl('ovlRou')">✕</button>
+    <span class="tag">🎡 Masa 2 · Tek kişilik</span>
+    <h3>Avrupa Ruleti <span class="muted" style="font-size:.7rem;letter-spacing:.1em">tek 0'lı çark</span></h3>
+    <div class="rw" id="rwRoot">
+      <div class="rw-disc" id="rwDisc"></div>
+      <div class="rw-ball" id="rwBall"></div>
+      <div class="rw-hub" id="rwHub">?</div>
+      <div class="rw-pin"></div>
+    </div>
+    <div class="bj-msg" id="rouMsg">Bahsurfanı seç, çarkı döndür.</div>
+    <div class="rou-hist" id="rouHist"></div>
+    <div class="chiprow" id="rouChips"></div>
+    <div class="rou-bets">
+      <button class="btn" data-b="red" onclick="rouSel(this,'Kırmızı ×2')">🔴 Kırmızı</button>
+      <button class="btn" data-b="black" onclick="rouSel(this,'Siyah ×2')">⚫ Siyah</button>
+      <button class="btn" data-b="even" onclick="rouSel(this,'Çift ×2')">Çift</button>
+      <button class="btn" data-b="odd" onclick="rouSel(this,'Tek ×2')">Tek</button>
+      <button class="btn" data-b="low" onclick="rouSel(this,'1–18 ×2')">1–18</button>
+      <button class="btn" data-b="high" onclick="rouSel(this,'19–36 ×2')">19–36</button>
+      <button class="btn" data-b="doz1" onclick="rouSel(this,'1. Düzine ×3')">1–12</button>
+      <button class="btn" data-b="doz2" onclick="rouSel(this,'2. Düzine ×3')">13–24</button>
+      <button class="btn" data-b="doz3" onclick="rouSel(this,'3. Düzine ×3')">25–36</button>
+      <select class="inp" id="rouNum" style="width:auto;padding:.35rem .5rem;font-size:.72rem">
+        <option value="-1">Sayı seç · ×36</option>
+      </select>
+      <button class="btn" id="rouNumBtn" onclick="rouNumSel()">Bu sayıya</button>
+    </div>
+    <div class="bj-btns">
+      <button class="btn solid" id="rouSpin" onclick="rouSpinIt()">ÇARKI DÖNDÜR</button>
+    </div>
+    <div class="slot-foot"><span class="muted" id="rouSelLbl">Bahis yok</span><span class="muted" id="rouBal"></span></div>
   </div>
 </div>
 
@@ -1807,9 +1913,11 @@ function crDraw(t, dead){
 
 /* ---- Table / Sport / Invite ---- */
 function openTable(id){
+  if(id === 'bj'){ bjOpen(); return; }
+  if(id === 'rl'){ rouOpen(); return; }
   const g = GAMES.find(x => x.id === id) || GAMES[7];
   $('tableTitle').textContent = g.icon + ' ' + g.name;
-  $('tableNote').textContent = '“' + g.note + '”';
+  $('tableNote').textContent = '\u201c' + g.note + '\u201d';
   $('tableIcon').textContent = g.icon;
   openOvl('ovlTable');
 }
@@ -2416,6 +2524,272 @@ function tournFinish(){
   $('tournVerdict').textContent = verdicts[rank] || ('Sıralama: #' + rank + ' · Ödül bu sefer başkasına. Nefes al; Çarşamba her hafta gelir.');
   if(prize) toast('🎯 <b>Turnuva ödülü:</b> +' + fmt(prize) + ' dürTL — skorun: ' + fmt(TOURN.score));
   else toast('🎯 Turnuva bitti — #' + rank + '. Skorun: ' + fmt(TOURN.score));
+}
+
+/* ================= MASA OYUNLARI: BLACKJACK + TEK KİŞİLİK RULET ================= */
+const CHIPS_SET = [10, 25, 50, 100, 250];
+function chipRow(elId, cur, cb){
+  const w = $(elId); if(!w) return;
+  w.innerHTML = CHIPS_SET.map(n => '<button class="chipB' + (n === cur ? ' on' : '') + '" onclick="' + cb + '(' + n + ')">' + n + '</button>').join('');
+}
+
+/* ————— BLACKJACK ————— */
+const BJ = { deck: [], ph: [], dh: [], bet: 0, chip: 50, mode: 'idle', dbl: false };
+const BJ_SUITS = ['♠','♥','♦','♣'];
+const BJ_RANKS = [['A',1],['2',2],['3',3],['4',4],['5',5],['6',6],['7',7],['8',8],['9',9],['10',10],['J',11],['Q',12],['K',13]];
+function bjShoe(){
+  for(let d = 0; d < 4; d++)           // 4 destelik ayakkabı
+    BJ_SUITS.forEach(su => BJ_RANKS.forEach(r => BJ.deck.push({ r: r[0], v: r[1], s: su })));
+  for(let i = BJ.deck.length - 1; i > 0; i--){ const j = Math.random() * (i + 1) | 0; [BJ.deck[i], BJ.deck[j]] = [BJ.deck[j], BJ.deck[i]]; }
+}
+function bjTotal(h){
+  let t = 0, a = 0;
+  h.forEach(c => { t += Math.min(10, c.v); if(c.v === 1) a++; });
+  while(a > 0 && t + 10 <= 21){ t += 10; a--; }
+  return t;
+}
+function bjCard(c, down){
+  if(down) return '<div class="dcc back"></div>';
+  const red = (c.s === '♥' || c.s === '♦');
+  return '<div class="dcc' + (red ? ' red' : '') + '"><b>' + c.r + '</b><i>' + c.s + '</i></div>';
+}
+function bjOpen(){
+  openOvl('ovlBj');
+  if(BJ.deck.length < 60) bjShoe();    // ayakkabı incelmişse yeniden kar
+  BJ.mode = 'idle'; bjReset();
+}
+function bjQuit(){ bjAutosave(); }
+function bjSetBtns(){
+  const m = BJ.mode;
+  $('bjDeal').classList.toggle('hidden', m !== 'idle');
+  ['bjHit','bjStand','bjDbl'].forEach(k => $(k).classList.toggle('hidden', m !== 'play'));
+  $('bjAgain').classList.toggle('hidden', m !== 'over');
+  $('bjDbl').classList.toggle('hidden', !(m === 'play' && BJ.ph.length === 2 && state.chips >= BJ.bet));
+}
+function bjDraw(revealAll){
+  $('bjDealer').innerHTML = BJ.dh.map((c, i) => bjCard(c, !revealAll && i === 1 && BJ.mode === 'play')).join('');
+  $('bjPlayer').innerHTML = BJ.ph.map(c => bjCard(c)).join('');
+  $('bjPTot').textContent = BJ.ph.length ? bjTotal(BJ.ph) : '';
+  if(revealAll || BJ.mode !== 'play') $('bjDTot').textContent = BJ.dh.length ? bjTotal(BJ.dh) : '';
+  else $('bjDTot').textContent = BJ.dh.length ? bjTotal([BJ.dh[0]]) + ' + ?' : '';
+  $('bjBal').textContent = 'Bakiye: ◈ ' + fmt(state.chips) + ' dürTL';
+  bjSetBtns();
+}
+function bjChip(n){ BJ.chip = n; chipRow('bjChips', n, 'bjChip'); }
+function bjReset(){
+  BJ.ph = []; BJ.dh = []; BJ.bet = 0; BJ.dbl = false; BJ.mode = 'idle';
+  const m = $('bjMsg'); m.className = 'bj-msg'; m.textContent = 'Bahis yapıp “Dağıt”a bas.';
+  bjChipRow(); bjDraw(false);
+}
+function bjChipRow(){ chipRow('bjChips', BJ.chip, 'bjChip'); }
+function bjMsg(t, cls){ const m = $('bjMsg'); m.className = 'bj-msg' + (cls ? ' ' + cls : ''); m.textContent = t; }
+function bjDeal(){
+  if(BJ.mode === 'play') return;
+  const bet = BJ.chip;
+  if(state.chips < bet){ toast('Yetersiz bakiye — daha küçük fiş seç.'); return; }
+  state.chips -= bet; st().wagered += bet; st().spins++;
+  BJ.bet = bet; BJ.ph = [BJ.deck.pop(), BJ.deck.pop()]; BJ.dh = [BJ.deck.pop(), BJ.deck.pop()];
+  BJ.mode = 'play'; BJ.dbl = false;
+  tone(520, 0, .05, 'triangle', .1); buzz(8);
+  bjDraw(false);
+  const pt = bjTotal(BJ.ph), dt = bjTotal(BJ.dh);
+  if(pt === 21 || dt === 21){
+    BJ.mode = 'over'; bjDraw(true);
+    if(pt === 21 && dt === 21){ bjSettle('push'); }
+    else if(pt === 21){ bjSettle('bj'); }
+    else bjSettle('lose', 'Krupiyede Blackjack.');
+  } else {
+    bjMsg('Kart çek, dur ya da ikiye katla.');
+  }
+}
+function bjHit(){
+  if(BJ.mode !== 'play') return;
+  BJ.ph.push(BJ.deck.pop());
+  tone(560, 0, .04, 'triangle', .08);
+  bjDraw(false);
+  const t = bjTotal(BJ.ph);
+  if(t > 21){ BJ.mode = 'over'; bjDraw(true); bjSettle('lose', 'Battın — ' + t + '.'); }
+  else if(t === 21){ bjStand(); }
+}
+function bjDouble(){
+  if(BJ.mode !== 'play' || BJ.ph.length !== 2 || state.chips < BJ.bet) return;
+  state.chips -= BJ.bet; st().wagered += BJ.bet;
+  BJ.bet *= 2; BJ.dbl = true;
+  BJ.ph.push(BJ.deck.pop());
+  bjDraw(false);
+  toast('🎩 İkiye katladın — bahis ◈ ' + fmt(BJ.bet) + ' dürTL.');
+  if(bjTotal(BJ.ph) > 21){ BJ.mode = 'over'; bjDraw(true); bjSettle('lose', 'Battın.'); }
+  else bjStand();
+}
+function bjStand(){
+  if(BJ.mode !== 'play') return;
+  BJ.mode = 'over';
+  bjDraw(true);
+  while(bjTotal(BJ.dh) < 17){ BJ.dh.push(BJ.deck.pop()); }
+  bjDraw(true);
+  const pt = bjTotal(BJ.ph), dt = bjTotal(BJ.dh);
+  if(dt > 21) bjSettle('win', 'Krupiye battı — ' + dt + '.');
+  else if(pt > dt) bjSettle('win');
+  else if(pt < dt) bjSettle('lose');
+  else bjSettle('push');
+}
+function bjSettle(res, note){
+  st().spins = st().spins; // dönüş sayacı zaten deal sırasında arttı
+  const pj = $('bjPlayer').querySelectorAll('.dcc');
+  if(res === 'bj' || res === 'win') pj.forEach(c => c.classList.add('win'));
+  if(res === 'bj'){
+    const pay = Math.floor(BJ.bet * 2.5);            // 3:2 öder
+    state.chips += pay; st().won += pay; st().big = Math.max(st().big, pay - BJ.bet);
+    bjMsg('BLACKJACK! ◈ +' + fmt(pay - BJ.bet) + ' dürTL', 'win');
+    sfxWin(3); buzz([30, 40, 30]);
+  } else if(res === 'win'){
+    const pay = BJ.bet * 2;
+    state.chips += pay; st().won += pay; st().big = Math.max(st().big, pay - BJ.bet);
+    bjMsg((note ? note + ' ' : '') + 'Kazandın: ◈ +' + fmt(BJ.bet) + ' dürTL', 'win');
+    sfxWin(1.5); buzz(25);
+  } else if(res === 'push'){
+    state.chips += BJ.bet;
+    bjMsg('Beri — bahsin iade edildi.');
+    tone(440, 0, .1, 'triangle', .08);
+  } else {
+    bjMsg((note ? note + ' ' : '') + 'El krupiyenin.', 'lose');
+    tone(220, 0, .18, 'sawtooth', .07);
+  }
+  saveDemo(); bjDraw(true);
+}
+function bjAutosave(){ saveDemo(); }
+
+/* ————— TEK KİŞİLİK RULET ————— */
+const ROU = { chip: 25, sel: null, spinning: false, rot: 0, hist: [] };
+function rouOpen(){
+  openOvl('ovlRou');
+  const sel = $('rouNum');
+  if(sel && sel.options.length < 38){
+    for(let n = 0; n <= 36; n++) sel.insertAdjacentHTML('beforeend', '<option value="' + n + '">' + n + ' · ×36</option>');
+  }
+  rouBuild(); rouChipRow(); rouDraw();
+  $('rouBal').textContent = 'Bakiye: ◈ ' + fmt(state.chips) + ' dürTL';
+}
+function rouBuild(){
+  const disc = $('rwDisc');
+  if(disc.dataset.built) return;
+  disc.dataset.built = '1';
+  const seg = 360 / 37;
+  let con = '';
+  RL_ORD.forEach((n, i) => {
+    const col = n === 0 ? '#0e5c2e' : (RL_RED.has(n) ? '#7e1b1b' : '#161310');
+    con += col + ' ' + (i * seg).toFixed(3) + 'deg ' + ((i + 1) * seg).toFixed(3) + 'deg,';
+  });
+  disc.style.background = 'conic-gradient(from ' + (-seg / 2).toFixed(3) + 'deg, ' + con.slice(0, -1) + ')';
+  RL_ORD.forEach((n, i) => {
+    const ang = i * seg + seg / 2;
+    disc.insertAdjacentHTML('beforeend',
+      '<span class="rw-num" style="transform:rotate(' + ang.toFixed(2) + 'deg) translateX(84px) rotate(90deg)">' + n + '</span>');
+  });
+}
+function rouChipRow(){ chipRow('rouChips', ROU.chip, 'rouChip'); }
+function rouChip(n){ ROU.chip = n; chipRow('rouChips', n, 'rouChip'); rouDraw(); }
+function rouSel(btn, lbl){
+  ROU.sel = btn.dataset.b;
+  document.querySelectorAll('.rou-bets .btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  $('rouSelLbl').textContent = 'Bahis: ' + lbl + ' · fiş ◈ ' + ROU.chip;
+  tone(700, 0, .04, 'triangle', .08);
+}
+function rouNumSel(){
+  const v = +$('rouNum').value;
+  if(v < 0){ toast('Önce 0–36 arasında bir sayı seç.'); return; }
+  ROU.sel = 'num:' + v;
+  document.querySelectorAll('.rou-bets .btn').forEach(b => b.classList.remove('on'));
+  $('rouNumBtn').classList.add('on');
+  $('rouSelLbl').textContent = 'Bahis: ' + v + ' düz sayı · ×36 · fiş ◈ ' + ROU.chip;
+  tone(820, 0, .05, 'triangle', .1);
+}
+function rouDraw(){
+  const ball = $('rwBall');
+  if(ball) ball.style.transform = 'translate(-50%,-50%) rotate(35deg) translateX(70px)';
+}
+function rouPays(b){
+  if(b === 'red')   return x => x !== 0 && RL_RED.has(x) ? 2 : 0;
+  if(b === 'black') return x => x !== 0 && !RL_RED.has(x) ? 2 : 0;
+  if(b === 'even')  return x => x !== 0 && x % 2 === 0 ? 2 : 0;
+  if(b === 'odd')   return x => x % 2 === 1 ? 2 : 0;
+  if(b === 'low')   return x => x >= 1 && x <= 18 ? 2 : 0;
+  if(b === 'high')  return x => x >= 19 ? 2 : 0;
+  if(b === 'doz1')  return x => x >= 1 && x <= 12 ? 3 : 0;
+  if(b === 'doz2')  return x => x >= 13 && x <= 24 ? 3 : 0;
+  if(b === 'doz3')  return x => x >= 25 ? 3 : 0;
+  if(b && b.indexOf('num:') === 0){ const t = +b.slice(4); return x => x === t ? 36 : 0; }
+  return () => 0;
+}
+function rouSpinIt(){
+  if(ROU.spinning) return;
+  if(!ROU.sel){ toast('Önce bir bahis seç — fişin hazır.'); return; }
+  const bet = ROU.chip;
+  if(state.chips < bet){ toast('Yetersiz bakiye — fişi küçült.'); return; }
+  state.chips -= bet; st().wagered += bet; st().spins++;
+  ROU.spinning = true;
+  $('rouSpin').disabled = true;
+  const msg = $('rouMsg'); msg.className = 'bj-msg'; msg.textContent = 'Çark dönüyor, top fırlatıldı…';
+  tone(1350, 0, .05, 'sine', .05);
+  const seg = 360 / 37;
+  const resIdx = Math.random() * 37 | 0, resNum = RL_ORD[resIdx];
+  const targetRot = 360 * (5 + (Math.random() * 2 | 0)) - (resIdx * seg + seg / 2);
+  const disc = $('rwDisc'), ball = $('rwBall');
+  const T = 4000, t0 = performance.now();
+  const rot0 = ROU.rot % 360, rotF = rot0 + targetRot;
+  let bang = Math.random() * 360 | 0;
+  const bvel = -(1400 + Math.random() * 500);
+  const R0 = 70, R1 = 52;
+  let radius = R0, last = t0, clickAcc = 0;
+  function frame(now){
+    const p = Math.min(1, (now - t0) / T);
+    const dt = Math.min(.05, (now - last) / 1000 || .016); last = now;
+    const e = 1 - Math.pow(1 - p, 3);
+    const rot = rot0 + (rotF - rot0) * e;
+    disc.style.transform = 'rotate(' + rot + 'deg)';
+    if(p < 0.6){
+      const decay = Math.exp(-2.2 * ((now - t0) / 1000) / 2.5);
+      bang += bvel * decay * dt;
+      radius = R0 - (R0 - R1) * rlSmooth(p / 0.6);
+      clickAcc += Math.abs(bvel * decay) * dt;
+      if(clickAcc > 52){ clickAcc = 0; tone(2200, 0, .012, 'square', .014); }
+    } else {
+      const tgt = rot + resIdx * seg + seg / 2;
+      bang += ((((tgt - bang) % 360) + 540) % 360 - 180) * 0.14;
+      radius += (R1 - radius) * 0.18;
+    }
+    ball.style.transform = 'translate(-50%,-50%) rotate(' + bang.toFixed(2) + 'deg) translateX(' + radius.toFixed(1) + 'px)';
+    ROU.rot = rot;
+    if(p < 1) requestAnimationFrame(frame);
+    else rouSettle(resNum, bet);
+  }
+  requestAnimationFrame(frame);
+}
+function rouSettle(n, bet){
+  ROU.spinning = false;
+  $('rouSpin').disabled = false;
+  const hub = $('rwHub'); hub.textContent = n;
+  hub.style.color = n === 0 ? '#7ee2a0' : (RL_RED.has(n) ? '#ff8a80' : '#f2e7c4');
+  const mul = rouPays(ROU.sel)(n);
+  const msg = $('rouMsg');
+  const renk = n === 0 ? 'yeşil' : (RL_RED.has(n) ? 'kırmızı' : 'siyah');
+  if(mul > 0){
+    const pay = bet * mul;
+    state.chips += pay; st().won += pay; st().big = Math.max(st().big, pay - bet);
+    msg.className = 'bj-msg win';
+    msg.textContent = n + ' ' + renk + ' — kazandın! ◈ +' + fmt(pay - bet) + ' dürTL';
+    sfxWin(mul >= 36 ? 4 : 1.4); buzz([25, 35, 25]);
+  } else {
+    msg.className = 'bj-msg lose';
+    msg.textContent = n + ' ' + renk + (n === 0 ? ' — sıfır, ev aldı.' : ' — bu el tutmadı.');
+    tone(240, 0, .15, 'sawtooth', .06);
+  }
+  ROU.hist.unshift(n); ROU.hist = ROU.hist.slice(0, 14);
+  $('rouHist').innerHTML = ROU.hist.map(x =>
+    '<span class="rchip ' + (x === 0 ? 'g' : (RL_RED.has(x) ? 'r' : 'b')) + '">' + x + '</span>').join('');
+  $('rouBal').textContent = 'Bakiye: ◈ ' + fmt(state.chips) + ' dürTL';
+  saveDemo();
 }
 
 /* ================= SUPABASE: hesap + bulut kayıt + başvuru ================= */
