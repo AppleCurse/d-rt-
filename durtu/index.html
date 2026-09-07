@@ -509,6 +509,35 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
   #burger{display:inline-flex!important}
   .chat-panel-fs{height:calc(100vh - 8rem)}
 }
+/* ---- Kulüp Kasası (Vault) ---- */
+.vault-pnl{width:min(540px,96vw);max-height:88vh;overflow-y:auto}
+.vault-nav{display:flex;gap:.4rem;border-bottom:1px solid var(--line);padding-bottom:.6rem;margin:.8rem 0 1.2rem;overflow-x:auto}
+.vtab{background:transparent;border:1px solid transparent;color:var(--muted);padding:.45rem .85rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:all .3s;white-space:nowrap}
+.vtab:hover{color:var(--gold)}
+.vtab.active{border-color:var(--gold);color:var(--gold);background:rgba(212,175,55,.08);font-weight:600}
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem}
+.method-card{border:1px solid var(--line);background:#0d0d0c;border-radius:8px;padding:.7rem .4rem;text-align:center;cursor:pointer;transition:all .3s}
+.method-card:hover{border-color:var(--gold-dim)}
+.method-card.active{border-color:var(--gold);background:rgba(212,175,55,.1);box-shadow:0 0 16px rgba(212,175,55,.15)}
+.method-card .m-icon{font-size:1.4rem;display:block;margin-bottom:.3rem}
+.method-card .m-name{font-size:.72rem;font-weight:600;color:var(--cream)}
+.method-card .m-sub{font-size:.58rem;color:var(--muted);margin-top:.15rem}
+.amt-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.6rem 0 1rem}
+.amt-btn{background:#0e0e0d;border:1px solid var(--line);color:var(--cream);padding:.5rem .3rem;border-radius:6px;font-size:.74rem;font-family:var(--serif);cursor:pointer;transition:all .2s}
+.amt-btn:hover{border-color:var(--gold);color:var(--gold)}
+.info-box{background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.18);border-radius:8px;padding:.85rem;margin-bottom:1rem;font-size:.75rem}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+.info-row:last-child{border-bottom:none}
+.copy-tag{background:rgba(212,175,55,.15);border:1px solid var(--gold);color:var(--gold);padding:.15rem .45rem;border-radius:4px;font-size:.62rem;cursor:pointer}
+.ledger-tbl{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:.6rem}
+.ledger-tbl th{text-align:left;color:var(--muted);padding:.5rem .4rem;border-bottom:1px solid var(--line);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase}
+.ledger-tbl td{padding:.6rem .4rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--cream)}
+.badge-ok{color:#4ade80;background:rgba(74,222,128,.1);padding:.15rem .4rem;border-radius:4px;font-size:.62rem}
+.badge-wait{color:#facc15;background:rgba(250,204,21,.1);padding:.15rem .4rem;border-radius:4px;font-size:.62rem}
+.bonus-card{background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(15,15,14,.9));border:1px solid rgba(212,175,55,.25);border-radius:10px;padding:1rem;margin-bottom:.8rem}
+.bonus-prog-bg{background:#1a1917;height:8px;border-radius:4px;overflow:hidden;margin:.6rem 0}
+.bonus-prog-fill{background:linear-gradient(90deg,var(--gold-dim),var(--gold));height:100%;border-radius:4px;transition:width .4s}
+
 #burger{display:none}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -568,7 +597,8 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
       <a href="#etkinlik">Etkinlikler</a>
     </div>
     <div class="nav-right">
-      <span class="hc">◈ <span class="chipsVal">1.000</span> dürTL</span>
+      <span class="hc" onclick="openVault()" style="cursor:pointer" title="Kulüp Kasası">◈ <span class="chipsVal">1.000</span> dürTL</span>
+      <button class="btn btn-sm" id="vaultNavBtn" style="padding:.32rem .7rem;font-size:.66rem;background:rgba(212,175,55,.14);border:1px solid var(--gold);color:var(--gold);border-radius:6px;cursor:pointer;font-weight:600;letter-spacing:.08em" onclick="openVault()">+ KASA</button>
       <button class="icon-btn" id="acctBtn" title="Hesap — bakiyeni bulutla taşı" onclick="openAuth()">☻</button>
       <button class="icon-btn" id="ambBtn" title="Salon ambiyansı">♪</button>
       <div class="avatar" id="avatarInit" onclick="openStats()" title="Dürtü Raporun" style="cursor:pointer">E</div>
@@ -1067,6 +1097,193 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
   </div>
 </div>
 
+<!-- KULÜP KASASI (VAULT) -->
+<div id="ovlVault" class="ovl hidden" onclick="ovlSelfClose(event,this)">
+  <div class="pnl vault-pnl">
+    <button class="close" onclick="closeOvl('ovlVault')">✕</button>
+    <span class="tag">✦ Kulüp Kasası</span>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem">
+      <h3 style="margin:0">DÜRTÜ Finans Kasası</h3>
+      <span class="hc" style="font-size:.8rem">Bakiye: ◈ <span class="chipsVal">1.000</span> dürTL</span>
+    </div>
+    <p class="noteline" style="margin:.6rem 0 .9rem">Kapalı kulüp içi sanal fon transferleri, mevduat simülasyonu ve ayrıcalıklar.</p>
+
+    <!-- Navigasyon Sekmeleri -->
+    <div class="vault-nav">
+      <button class="vtab active" id="vtab-dep" onclick="switchVaultTab('dep')">💳 Yatırım</button>
+      <button class="vtab" id="vtab-with" onclick="switchVaultTab('with')">💸 Çekim</button>
+      <button class="vtab" id="vtab-bonus" onclick="switchVaultTab('bonus')">🎁 Ayrıcalıklar</button>
+      <button class="vtab" id="vtab-ledg" onclick="switchVaultTab('ledg')">📜 İşlem Defteri</button>
+    </div>
+
+    <!-- 1. YATIRIM (MEVDUAT) -->
+    <div id="vsec-dep">
+      <div class="method-grid">
+        <div class="method-card active" id="mcard-fast" onclick="selectDepMethod('fast')">
+          <span class="m-icon">🏛️</span>
+          <div class="m-name">FAST / Havale</div>
+          <div class="m-sub">7/24 Anında</div>
+        </div>
+        <div class="method-card" id="mcard-papara" onclick="selectDepMethod('papara')">
+          <span class="m-icon">🟪</span>
+          <div class="m-name">Papara</div>
+          <div class="m-sub">Cüzdandan Cüzdana</div>
+        </div>
+        <div class="method-card" id="mcard-usdt" onclick="selectDepMethod('usdt')">
+          <span class="m-icon">🟢</span>
+          <div class="m-name">USDT (TRC-20)</div>
+          <div class="m-sub">Blokzincir</div>
+        </div>
+      </div>
+
+      <div class="info-box" id="depInfoBox">
+        <div class="info-row">
+          <span class="muted">Banka / Kanal</span>
+          <b id="depBankName">Garanti BBVA · FAST</b>
+        </div>
+        <div class="info-row">
+          <span class="muted">Alıcı Ünvanı</span>
+          <b id="depReceiver">DÜRTÜ KULÜP HİZMETLERİ A.Ş.</b>
+        </div>
+        <div class="info-row">
+          <span class="muted" id="depAddrLbl">IBAN Numarası</span>
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <span id="depIban" style="font-family:monospace;font-size:.7rem">TR33 0006 2000 0000 1928 3746 55</span>
+            <button class="copy-tag" onclick="copyDepInfo('depIban')">Kopyala</button>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="muted">Açıklama (Kod)</span>
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <b id="depRefCode" style="color:var(--gold);font-family:monospace">DUR-7729</b>
+            <button class="copy-tag" onclick="copyDepInfo('depRefCode')">Kopyala</button>
+          </div>
+        </div>
+      </div>
+
+      <label style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">Yatırılacak Tutar (dürTL)</label>
+      <div class="amt-presets">
+        <button class="amt-btn" onclick="setDepAmt(250)">250 ₺</button>
+        <button class="amt-btn" onclick="setDepAmt(500)">500 ₺</button>
+        <button class="amt-btn" onclick="setDepAmt(1000)">1.000 ₺</button>
+        <button class="amt-btn" onclick="setDepAmt(2500)">2.500 ₺</button>
+        <button class="amt-btn" onclick="setDepAmt(5000)">5.000 ₺</button>
+        <button class="amt-btn" onclick="setDepAmt(10000)">10.000 ₺</button>
+      </div>
+
+      <input class="inp" id="depAmountInp" type="number" min="100" max="100000" placeholder="Tutar girin (min 100 dürTL)" style="margin-bottom:.8rem" value="1000">
+
+      <button class="btn solid" id="btnSubmitDep" style="width:100%;padding:.8rem;justify-content:center" onclick="submitDeposit()">
+        <span>YATIRIMI BİLDİR & BAKİYE YÜKLE</span>
+      </button>
+      <p class="muted" style="font-size:.62rem;text-align:center;margin-top:.6rem">Selin transferi onayladığında sanal dürTL bakiyeniz anında hesaba geçer.</p>
+    </div>
+
+    <!-- 2. ÇEKİM (TAHSİLAT) -->
+    <div id="vsec-with" class="hidden">
+      <div class="info-box">
+        <div class="info-row">
+          <span class="muted">Kullanılabilir Bakiye</span>
+          <b style="color:var(--gold)">◈ <span class="chipsVal">1.000</span> dürTL</b>
+        </div>
+        <div class="info-row">
+          <span class="muted">Minimum Çekim</span>
+          <b>500 dürTL</b>
+        </div>
+        <div class="info-row">
+          <span class="muted">İnceleme Süresi</span>
+          <span>~2 Dakika (Selin Kontrolü)</span>
+        </div>
+      </div>
+
+      <label style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">Çekim Yöntemi</label>
+      <select class="inp" id="withMethod" style="margin-bottom:.8rem" onchange="toggleWithFields()">
+        <option value="bank">Banka Hesabı (IBAN / FAST)</option>
+        <option value="papara">Papara Cüzdanı</option>
+        <option value="crypto">Tether USDT (TRC-20 Cüzdanı)</option>
+      </select>
+
+      <label style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)" id="withTargetLbl">IBAN / Hesap Numarası</label>
+      <input class="inp" id="withTargetInp" placeholder="TR..." style="margin-bottom:.8rem">
+
+      <label style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">Çekilecek Miktar (dürTL)</label>
+      <input class="inp" id="withAmtInp" type="number" min="500" placeholder="Örn. 500" style="margin-bottom:.9rem">
+
+      <button class="btn solid" id="btnSubmitWith" style="width:100%;padding:.8rem;justify-content:center" onclick="submitWithdraw()">
+        <span>ÇEKİM TALEBİNİ İLET</span>
+      </button>
+      <p class="muted" style="font-size:.62rem;text-align:center;margin-top:.6rem">Çekim onaylandığında bakiye düşülür ve işlem defterine işlenir.</p>
+    </div>
+
+    <!-- 3. AYRICALIKLAR & BONUS MOTORU -->
+    <div id="vsec-bonus" class="hidden">
+      <div class="bonus-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="tag" style="margin:0">🍷 Sükûnet İadesi</span>
+          <span class="badge-ok">%10 Haftalık İade</span>
+        </div>
+        <h4 style="margin:.4rem 0 .2rem;font-family:var(--serif);font-size:.95rem">Kayıp Telafisi</h4>
+        <p class="muted" style="font-size:.72rem;line-height:1.5;margin:0">Bu hafta oyunlarda yaşanan şanssız serilerde kulüp yanınızda. Net kaybınızın %10'u hazır.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.8rem;padding-top:.6rem;border-top:1px dashed rgba(255,255,255,.08)">
+          <div>
+            <span class="muted" style="font-size:.64rem">Hak Edilen İade:</span>
+            <div id="cashbackAmtVal" style="font-family:var(--serif);color:var(--gold);font-size:1.1rem;font-weight:600">◈ 150 dürTL</div>
+          </div>
+          <button class="btn btn-sm solid" id="btnClaimCashback" onclick="claimCashback()">İADEYİ AL</button>
+        </div>
+      </div>
+
+      <div class="bonus-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="tag" style="margin:0">✈️ Gece Kuşu Yakıtı</span>
+          <span class="badge-wait">22:00 — 04:00</span>
+        </div>
+        <h4 style="margin:.4rem 0 .2rem;font-family:var(--serif);font-size:.95rem">Aviator Gece Desteği</h4>
+        <p class="muted" style="font-size:.72rem;line-height:1.5;margin:0">Gece seansında uçuş yapan kulüp üyelerine tek seferlik +500 dürTL yakıt jesti.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.8rem;padding-top:.6rem;border-top:1px dashed rgba(255,255,255,.08)">
+          <div style="font-size:.75rem;color:var(--muted)">Durum: <b id="nightBonusStatus" style="color:var(--gold)">Kullanılabilir</b></div>
+          <button class="btn btn-sm" id="btnClaimNight" onclick="claimNightBonus()">YAKITI YÜKLE (+500)</button>
+        </div>
+      </div>
+
+      <div class="bonus-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="muted" style="font-size:.66rem;letter-spacing:.12em;text-transform:uppercase">Kulüp Çevrim İlerlemesi</span>
+          <span id="turnoverPct" style="font-size:.7rem;color:var(--gold);font-weight:600">35%</span>
+        </div>
+        <div class="bonus-prog-bg">
+          <div class="bonus-prog-fill" id="turnoverBar" style="width:35%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted)">
+          <span id="turnoverCurrent">3.500 dürTL çevrildi</span>
+          <span>Hedef: 10.000 dürTL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. İŞLEM DEFTERİ (LEDGER) -->
+    <div id="vsec-ledg" class="hidden">
+      <p class="muted" style="font-size:.7rem;margin:0 0 .5rem">Tüm para yatırma, çekme ve bonus hareketlerinin şeffaf kayıtları.</p>
+      <div style="max-height:280px;overflow-y:auto">
+        <table class="ledger-tbl">
+          <thead>
+            <tr>
+              <th>Zaman</th>
+              <th>İşlem</th>
+              <th>Tutar</th>
+              <th>Kanal</th>
+              <th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerRows">
+            <!-- Dinamik JS satırları -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <script>
@@ -1113,7 +1330,8 @@ const SAVE_KEY = 'durtu_demo_v1';
 function snapshot(){
   return { chips: state.chips, name: state.name, best: (typeof CR !== 'undefined' && CR.best) || 0,
     invites: state.invites, codes: state.codes || [], lastDay: new Date().toDateString(),
-    streakDays: state.streakDays || 0, stats: state.stats };
+    streakDays: state.streakDays || 0, stats: state.stats,
+    ledger: (typeof VAULT !== 'undefined' ? VAULT.ledger : []) };
 }
 function saveDemo(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); }catch(e){} cloudPush(); }
 function loadDemo(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); }catch(e){ return null; } }
@@ -1619,6 +1837,7 @@ function onSettle(){
   if(total > 0){
     state.chips += total; renderChips(); giftWin();
     st().won += total; st().big = Math.max(st().big, total);
+    if(typeof addLedgerEntry === 'function' && total >= 100) addLedgerEntry('Slot Kazancı', total, (SL.theme && SL.theme.name) || 'Slot', 'ok');
     SL.winTarget = total;
     $('winHud').classList.add('hot');
     const mid = SL.lines[0];
@@ -1851,7 +2070,9 @@ function crCash(auto){
   CR.cashed = true;
   const m = CR.m, win = Math.round(CR.bet * m);
   state.chips += win; renderChips(); crBal();
-  st().won += win; saveDemo();
+  st().won += win;
+  if(typeof addLedgerEntry === 'function') addLedgerEntry('Aviator Çıkışı', win, m.toFixed(2) + '× Çarpan', 'ok');
+  saveDemo();
   tone(523, 0, .15, 'triangle', .12); tone(784, .1, .25, 'triangle', .12);
   buzz([30,45,75]);
   CR.best = Math.max(CR.best || 0, m);
@@ -3043,7 +3264,280 @@ function crackleOn(){
     src.start(); JZ.noiseSrc = src;
   }catch(e){}
 }
-function crackleOff(){ if(JZ.noiseSrc){ try{ JZ.noiseSrc.stop(); }catch(e){} JZ.noiseSrc = null; } }
+/* ================= KULÜP KASASI (VAULT) SİSTEMİ ================= */
+const VAULT = {
+  activeTab: 'dep',
+  depMethod: 'fast',
+  nightBonusClaimed: false,
+  cashbackClaimed: false,
+  ledger: []
+};
+
+try {
+  VAULT.ledger = JSON.parse(localStorage.getItem('durtu_ledger') || '[]');
+  if(!Array.isArray(VAULT.ledger)) VAULT.ledger = [];
+} catch(e){ VAULT.ledger = []; }
+
+if(VAULT.ledger.length === 0){
+  VAULT.ledger.push({
+    id: 'TX-INIT',
+    date: 'Bugün ' + new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}),
+    type: 'Hoş Geldin Jesti',
+    amt: 1000,
+    method: 'Kulüp Hediyesi',
+    status: 'ok'
+  });
+}
+
+function openVault(){
+  switchVaultTab(VAULT.activeTab || 'dep');
+  renderLedger();
+  updateVaultBonus();
+  openOvl('ovlVault');
+  renderChips();
+}
+
+function switchVaultTab(tab){
+  VAULT.activeTab = tab;
+  ['dep','with','bonus','ledg'].forEach(t => {
+    const b = $('vtab-' + t);
+    const sec = $('vsec-' + t);
+    if(b) b.classList.toggle('active', t === tab);
+    if(sec) sec.classList.toggle('hidden', t !== tab);
+  });
+  if(tab === 'ledg') renderLedger();
+  if(tab === 'bonus') updateVaultBonus();
+}
+
+function selectDepMethod(m){
+  VAULT.depMethod = m;
+  ['fast','papara','usdt'].forEach(x => {
+    const card = $('mcard-' + x);
+    if(card) card.classList.toggle('active', x === m);
+  });
+  const bankName = $('depBankName');
+  const receiver = $('depReceiver');
+  const ibanLbl = $('depAddrLbl');
+  const ibanVal = $('depIban');
+  if(m === 'fast'){
+    bankName.textContent = 'Garanti BBVA · FAST';
+    receiver.textContent = 'DÜRTÜ KULÜP HİZMETLERİ A.Ş.';
+    ibanLbl.textContent = 'IBAN Numarası';
+    ibanVal.textContent = 'TR33 0006 2000 0000 1928 3746 55';
+  } else if(m === 'papara'){
+    bankName.textContent = 'Papara Elektronik Para A.Ş.';
+    receiver.textContent = 'DÜRTÜ KULÜP YÖNETİM';
+    ibanLbl.textContent = 'Papara No';
+    ibanVal.textContent = '1984273891';
+  } else if(m === 'usdt'){
+    bankName.textContent = 'Tether USD · TRC-20 (Tron)';
+    receiver.textContent = 'Kulüp Sıcak Cüzdanı #4';
+    ibanLbl.textContent = 'TRC-20 Adresi';
+    ibanVal.textContent = 'TX8kM49vB2eP91xLqZzY3w5aR7vT1cQp9e';
+  }
+}
+
+function setDepAmt(val){
+  $('depAmountInp').value = val;
+}
+
+function copyDepInfo(id){
+  const el = $(id);
+  if(!el) return;
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    toast('📋 Kopyalandı: <b>' + text + '</b>');
+  }).catch(() => {
+    toast('Kopyalandı: ' + text);
+  });
+}
+
+function submitDeposit(){
+  const amt = parseInt($('depAmountInp').value, 10);
+  if(isNaN(amt) || amt < 100){
+    toast('⚠️ Minimum yatırım tutarı 100 dürTL’dir.');
+    return;
+  }
+  const btn = $('btnSubmitDep');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳ Selin işlemi doğruluyor (Banka sorgulanıyor)...</span>';
+  
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<span>YATIRIMI BİLDİR & BAKİYE YÜKLE</span>';
+    
+    state.chips += amt;
+    renderChips();
+    
+    const methodName = VAULT.depMethod === 'fast' ? 'FAST/Havale' : (VAULT.depMethod === 'papara' ? 'Papara' : 'USDT');
+    addLedgerEntry('Mevduat (Yatırım)', amt, methodName, 'ok');
+    saveDemo();
+    
+    sfxWin(2);
+    buzz([30, 40, 50]);
+    toast('💳 <b>Yatırım Onaylandı!</b> ◈ +' + fmt(amt) + ' dürTL hesabınıza yüklendi.');
+  }, 1800);
+}
+
+function toggleWithFields(){
+  const m = $('withMethod').value;
+  const lbl = $('withTargetLbl');
+  const inp = $('withTargetInp');
+  if(m === 'bank'){
+    lbl.textContent = 'Banka IBAN Numarası (Ad Soyad ile uyumlu)';
+    inp.placeholder = 'TR...';
+  } else if(m === 'papara'){
+    lbl.textContent = 'Papara Hesap No / Kullanıcı Adı';
+    inp.placeholder = '10 haneli Papara numarası';
+  } else if(m === 'crypto'){
+    lbl.textContent = 'USDT TRC-20 Cüzdan Adresi';
+    inp.placeholder = 'T ile başlayan TRC-20 adresi';
+  }
+}
+
+function submitWithdraw(){
+  const amt = parseInt($('withAmtInp').value, 10);
+  const target = ($('withTargetInp').value || '').trim();
+  if(isNaN(amt) || amt < 500){
+    toast('⚠️ Minimum çekim tutarı 500 dürTL’dir.');
+    return;
+  }
+  if(amt > state.chips){
+    toast('⚠️ Yetersiz bakiye! Mevcut: ◈ ' + fmt(state.chips) + ' dürTL');
+    return;
+  }
+  if(!target || target.length < 5){
+    toast('⚠️ Lütfen geçerli bir hesap/cüzdan adresi giriniz.');
+    return;
+  }
+  
+  state.chips -= amt;
+  renderChips();
+  
+  const mVal = $('withMethod').value;
+  const mName = mVal === 'bank' ? 'Banka/FAST' : (mVal === 'papara' ? 'Papara' : 'USDT');
+  
+  const tx = addLedgerEntry('Tahsilat (Çekim)', -amt, mName, 'wait');
+  saveDemo();
+  
+  toast('💸 <b>Çekim Talebi Alındı:</b> ◈ ' + fmt(amt) + ' dürTL incelemeye alındı. Selin 2 dk içinde onaylayacak.');
+  closeOvl('ovlVault');
+  
+  setTimeout(() => {
+    tx.status = 'ok';
+    try { localStorage.setItem('durtu_ledger', JSON.stringify(VAULT.ledger)); }catch(e){}
+    toast('✅ <b>Transfer Tamamlandı:</b> ◈ ' + fmt(amt) + ' dürTL ' + mName + ' hesabınıza aktarıldı.');
+  }, 4500);
+}
+
+function updateVaultBonus(){
+  const wagered = (state.stats && state.stats.wagered) || 1200;
+  const won = (state.stats && state.stats.won) || 800;
+  const netLoss = Math.max(0, wagered - won);
+  const cb = Math.max(150, Math.round(netLoss * 0.1));
+  $('cashbackAmtVal').textContent = '◈ ' + fmt(cb) + ' dürTL';
+  
+  const targetTurnover = 10000;
+  const currentTurnover = Math.min(targetTurnover, wagered);
+  const pct = Math.round((currentTurnover / targetTurnover) * 100);
+  $('turnoverPct').textContent = pct + '%';
+  $('turnoverBar').style.width = pct + '%';
+  $('turnoverCurrent').textContent = fmt(currentTurnover) + ' dürTL çevrildi';
+  
+  const hr = new Date().getHours();
+  const isNight = (hr >= 22 || hr < 6);
+  const stBadge = $('nightBonusStatus');
+  const btnNight = $('btnClaimNight');
+  if(VAULT.nightBonusClaimed){
+    stBadge.textContent = 'Kullanıldı (Yarın tekrar)';
+    stBadge.style.color = 'var(--muted)';
+    btnNight.disabled = true;
+  } else if(isNight){
+    stBadge.textContent = 'Kullanılabilir (Gece Saati)';
+    stBadge.style.color = '#4ade80';
+    btnNight.disabled = false;
+  } else {
+    stBadge.textContent = 'Saat 22:00’de açılır';
+    stBadge.style.color = '#facc15';
+    btnNight.disabled = false;
+  }
+}
+
+function claimCashback(){
+  if(VAULT.cashbackClaimed){
+    toast('Bu haftaki sükûnet iadesini zaten aldınız.');
+    return;
+  }
+  const amt = parseInt($('cashbackAmtVal').textContent.replace(/[^\d]/g, ''), 10) || 150;
+  VAULT.cashbackClaimed = true;
+  state.chips += amt;
+  renderChips();
+  addLedgerEntry('Sükûnet İadesi', amt, 'Kulüp Cashback', 'ok');
+  saveDemo();
+  sfxWin(1.5);
+  toast('🍷 <b>Sükûnet İadesi Alındı!</b> ◈ +' + fmt(amt) + ' dürTL hesabınıza eklendi.');
+  $('btnClaimCashback').disabled = true;
+  $('btnClaimCashback').textContent = 'ALINDI';
+}
+
+function claimNightBonus(){
+  if(VAULT.nightBonusClaimed){
+    toast('Gece kuşu yakıtını bu gece için zaten aldınız.');
+    return;
+  }
+  VAULT.nightBonusClaimed = true;
+  const amt = 500;
+  state.chips += amt;
+  renderChips();
+  addLedgerEntry('Gece Kuşu Yakıtı', amt, 'Aviator Promosyon', 'ok');
+  saveDemo();
+  sfxWin(1.8);
+  toast('✈️ <b>Gece Yakıtı Yüklendi!</b> ◈ +' + fmt(amt) + ' dürTL hesabınıza tanımlandı.');
+  updateVaultBonus();
+}
+
+function addLedgerEntry(type, amt, method, status){
+  const now = new Date();
+  const dateStr = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+  const entry = {
+    id: 'TX-' + Math.random().toString(36).substr(2,6).toUpperCase(),
+    date: dateStr,
+    type: type,
+    amt: amt,
+    method: method,
+    status: status
+  };
+  VAULT.ledger.unshift(entry);
+  if(VAULT.ledger.length > 40) VAULT.ledger = VAULT.ledger.slice(0, 40);
+  try{ localStorage.setItem('durtu_ledger', JSON.stringify(VAULT.ledger)); }catch(e){}
+  renderLedger();
+  return entry;
+}
+
+function renderLedger(){
+  const tbody = $('ledgerRows');
+  if(!tbody) return;
+  if(VAULT.ledger.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.4rem">Henüz finansal işlem hareketi yok.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = VAULT.ledger.map(row => {
+    const isPos = row.amt >= 0;
+    const amtStr = (isPos ? '+' : '') + fmt(row.amt) + ' dürTL';
+    const amtColor = isPos ? '#4ade80' : 'var(--red)';
+    const statusBadge = row.status === 'ok' 
+      ? '<span class="badge-ok">Tamamlandı</span>' 
+      : '<span class="badge-wait">İnceleniyor</span>';
+    return '<tr>' +
+      '<td style="font-family:monospace;color:var(--muted)">' + row.date + '</td>' +
+      '<td style="font-weight:600">' + row.type + '</td>' +
+      '<td style="font-family:var(--serif);font-weight:600;color:' + amtColor + '">◈ ' + amtStr + '</td>' +
+      '<td style="color:var(--muted)">' + row.method + '</td>' +
+      '<td>' + statusBadge + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
 $('ambBtn').onclick = jazzToggle;
 </script>
 </body>

@@ -21,7 +21,7 @@ export default function Chat({ name }){
     if(!speakRef.current) return;
     try{
       if(!('speechSynthesis' in window)) return;
-      const clean = txt.replace(/<[^>]+>/g, ' ').replace(/[“”"'‘’]/g, '').replace(/\p{Extended_Pictographic}/gu, '').replace(/\s+/g, ' ').trim();
+      const clean = txt.replace(/<[^>]+>/g, ' ').replace(new RegExp('["\'“”‘’]', 'g'), '').replace(/\p{Extended_Pictographic}/gu, '').replace(/\s+/g, ' ').trim();
       if(!clean) return;
       const u = new SpeechSynthesisUtterance(clean);
       u.lang = 'tr-TR'; u.rate = 1.06; u.pitch = 1.22; u.volume = .9;
@@ -89,8 +89,8 @@ export default function Chat({ name }){
         <div id="chatPanel">
           <div className="chat-head">
             <div className="cav">S</div>
-            <div><b style={{ fontWeight: 500, fontSize: '.85rem' }}>Selin</b><br />
-              <small className="muted" style={{ fontSize: '.66rem }}>
+            <div><b style={{ fontWeight: 500 }}>Selin</b><br />
+              <small className="muted">
                 <span className="dot"></span>Kişisel Temsilcin · çevrimiçi
               </small>
             </div>
