@@ -886,7 +886,7 @@ footer .flogo{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;fon
       <button class="btn solid spin-btn" id="crStartBtn" onclick="crStart()">UÇUR</button>
       <button class="btn spin-btn" id="crCashBtn" onclick="crCash()" disabled>NAKİT ÇIKIŞ<span id="crCashVal" style="display:block;font-size:.62rem;letter-spacing:.08em;opacity:.75;margin-top:.2rem"></span></button>
     </div>
-    <div class="slot-foot"><span class="muted" id="crMsg">Tur hazır. Uçak seni bekliyor.</span><span class="muted">Dürtü bilir — ama söylemez.</span></div>
+    <div class="slot-foot"><span class="muted" id="crMsg">Tur hazır. Uçak seni bekliyor.</span><span class="muted" id="crBalance"></span></div>
   </div>
 </div>
 
@@ -1773,17 +1773,27 @@ function openCrash(){
   openOvl('ovlCrash');
   renderAngelInto('crash');
   crFit(); CR.open = true;
-  CR.pts = [[0,1]]; CR.m = 1;
+  CR.pts = [[0,1]]; CR.m = 1; crBal();
   $('crOvl').classList.add('hidden');
   crDraw(0);
 }
-function crQuit(){ CR.open = false; CR.running = false; crHum(false); cancelAnimationFrame(CR.raf); }
+function crQuit(){
+  if(CR.running && !CR.cashed){
+    // sektör standardı: bağlantı/çıkış anında mevcut çarpandan otomatik tahsilat
+    crCash(); 
+    toast('✈️ Tur ortasında çıktın — ' + CR.m.toFixed(2) + '× noktasında otomatik kasaya girdi.');
+  }
+  CR.open = false; CR.running = false; crHum(false); cancelAnimationFrame(CR.raf);
+}
 
+function crBal(){ const b = $('crBalance'); if(b) b.textContent = 'Bakiye: ◈ ' + fmt(state.chips) + ' dürTL'; }
 function crStart(){
   if(CR.running || !CR.open) return;
   const bet = +$('crBet').value;
-  if(state.chips < bet){ toast('Yetersiz demo bakiyesi — kapıdaki minik makineler hâlâ sıcak.'); return; }
-  state.chips -= bet; renderChips();
+  if(!(bet > 0)){ toast('Önce bahis seç.'); return; }
+  if(state.chips < bet){ toast('Yetersiz demo bakiyesi — kapıdaki minik makineler hâlâ sıcak. (Bakiye: ◈ ' + fmt(state.chips) + ')'); return; }
+  state.chips -= bet; renderChips(); crBal();
+  try{
   st().wagered += bet;
   CR.running = true; CR.cashed = false;
   CR.m = 1; CR.bet = bet; CR.crash = crashPoint();
@@ -1796,9 +1806,17 @@ function crStart(){
   $('crOvl').classList.add('hidden');
   crNewRound(); crHum(true);
   sfxSpinStart && sfxSpinStart();
-  CR.t0 = performance.now();
-  cancelAnimationFrame(CR.raf);
-  CR.raf = requestAnimationFrame(crLoop);
+    CR.t0 = performance.now();
+    cancelAnimationFrame(CR.raf);
+    CR.raf = requestAnimationFrame(crLoop);
+  }catch(err){
+    // güvenlik ağı: tur başlatılamazsa bahis geri döner, hiçbir şey sessizce yutulmaz
+    state.chips += bet; renderChips(); crBal(); saveDemo();
+    CR.running = false; crHum(false);
+    $('crStartBtn').disabled = false; $('crCashBtn').disabled = true;
+    $('crMsg').textContent = 'Havalanamadı — bahsin geri verildi. Tekrar dene.';
+    console.error('crStart', err);
+  }
 }
 function crLoop(now){
   if(!CR.open) { crHum(false); return; }
@@ -1822,11 +1840,18 @@ function crLoop(now){
   CR.raf = requestAnimationFrame(crLoop);
 }
 function crCash(auto){
-  if(!CR.running || CR.cashed) return;
+  if(CR.cashed) return;
+  if(!CR.running){
+    if(!auto){
+      $('crMsg').textContent = 'Tur çoktan bitti — top düştükten sonra çıkış olmaz. Yeni tur başlat.';
+      tone(200, 0, .12, 'sawtooth', .07);
+    }
+    return;
+  }
   CR.cashed = true;
   const m = CR.m, win = Math.round(CR.bet * m);
-  state.chips += win; renderChips();
-  st().won += win;
+  state.chips += win; renderChips(); crBal();
+  st().won += win; saveDemo();
   tone(523, 0, .15, 'triangle', .12); tone(784, .1, .25, 'triangle', .12);
   buzz([30,45,75]);
   CR.best = Math.max(CR.best || 0, m);
@@ -1854,6 +1879,7 @@ function crEnd(){
   CR.cashed ? giftWin() : giftLose();
   $('crStartBtn').disabled = false;
   $('crCashBtn').disabled = true;
+  crBal(); saveDemo();
   setTimeout(() => { if(CR.open && !CR.running) $('crOvl').classList.add('hidden'); }, 1600);
 }
 function crDraw(t, dead){
