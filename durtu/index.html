@@ -2822,8 +2822,8 @@ function rouSettle(n, bet){
 /* ── AYAR: Supabase proje URL ve anon public key buraya yapıştırılınca
       hesap sistemi otomatik devreye girer; boş kalırsa site localStorage
       demosu olarak çalışmaya devam eder (ağsız, güvenli geri düşüş). ── */
-const SUPA_URL  = '';   // örn. https://abcdefgh.supabase.co
-const SUPA_ANON = '';   // anon public key
+const SUPA_URL  = 'https://rkrrmuvdlwdeiummnnkv.supabase.co';
+const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrcnJtdXZkbHdkZWl1bW1ubmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MjgwODIsImV4cCI6MjA4MTQwNDA4Mn0.A_EvPB9SoohIqdIUgBvcwV_El2HwksKXKU2Q6iW9Gvc';
 function supaEnabled(){ return SUPA_URL.length > 10 && SUPA_ANON.length > 20; }
 
 const SUPA = { sess: null };
