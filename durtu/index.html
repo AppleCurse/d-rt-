@@ -904,6 +904,7 @@ body.tick footer{padding-bottom:34px}
       <div class="stat-row"><span>Net</span><b id="stNet">0</b></div>
       <div class="stat-row"><span>En büyük tek kazanç</span><b>◈ <span id="stBig">0</span></b></div>
       <div class="stat-row"><span>Aviator rekoru</span><b id="stCrash">—</b></div>
+      <div class="stat-row"><span>VIP Kulüp Kademesi</span><b id="stVip">Bronz 🥉</b></div>
       <div class="stat-row"><span>Gün serisi</span><b id="stStreak">1 gün</b></div>
     </div>
     <div class="hist-head">Son turlar</div>
@@ -1541,8 +1542,282 @@ body.tick footer{padding-bottom:34px}
 
 <script>
 /* ================= STATE ================= */
-const state = { name:'Emre', chips:1000, invites:3, entered:false, codes:[], streakDays:0, stats:null, claimedPromos:[] };
+const state = { name:'Emre', chips:1000, invites:3, entered:false, codes:[], streakDays:0, stats:null, claimedPromos:[], favorites:[], claimedVipChests:[] };
 function st(){ const t = state.stats = state.stats || { spins:0, won:0, wagered:0, big:0 }; if(!Array.isArray(t.hist)) t.hist = []; return t; }
+
+/* ================= VIP SİSTEMİ ================= */
+const VIP_TIERS = [
+  { id: 'bronz',  name: 'Bronz',  icon: '🥉', min: 0,      reward: 0,    perk: 'Standart masa limitleri' },
+  { id: 'gumus',  name: 'Gümüş',  icon: '🥈', min: 5000,   reward: 500,  perk: '%5 kayıp iadesi & 500 dürTL sandık ödülü' },
+  { id: 'altin',  name: 'Altın',  icon: '🥇', min: 20000,  reward: 1500, perk: 'Özel krupiye & 1.500 dürTL sandık ödülü' },
+  { id: 'platin', name: 'Platin', icon: '💎', min: 50000,  reward: 3500, perk: 'Limitsiz turbo spin & 3.500 dürTL sandık ödülü' },
+  { id: 'elmas',  name: 'Elmas',  icon: '👑', min: 100000, reward: 10000,perk: 'Dürtü Kurucular Kulübü & 10.000 dürTL sandık ödülü' },
+];
+
+function getVipInfo(wagered){
+  const w = (typeof wagered === 'number') ? wagered : (st().wagered || 0);
+  let tierIdx = 0;
+  for(let i = VIP_TIERS.length - 1; i >= 0; i--){
+    if(w >= VIP_TIERS[i].min){
+      tierIdx = i;
+      break;
+    }
+  }
+  const cur = VIP_TIERS[tierIdx];
+  const next = VIP_TIERS[tierIdx + 1] || null;
+  let pct = 100;
+  let remaining = 0;
+  if(next){
+    const span = next.min - cur.min;
+    const prog = w - cur.min;
+    pct = Math.min(100, Math.max(0, Math.round((prog / span) * 100)));
+    remaining = next.min - w;
+  }
+  return { tier: cur, next, pct, remaining, wagered: w, tierIdx };
+}
+
+function claimVipChest(tierId){
+  if(!Array.isArray(state.claimedVipChests)) state.claimedVipChests = [];
+  const tier = VIP_TIERS.find(t => t.id === tierId);
+  if(!tier || !tier.reward) return;
+  const w = st().wagered || 0;
+  if(w < tier.min){
+    toast(`⚠️ Bu sandık için henüz yeterli bahis hacmine ulaşmadın (${fmt(tier.min)} dürTL gerekli).`);
+    return;
+  }
+  if(state.claimedVipChests.includes(tierId)){
+    toast(`ℹ️ <b>${tier.name} Sandığı</b> zaten açıldı.`);
+    return;
+  }
+  state.claimedVipChests.push(tierId);
+  state.chips += tier.reward;
+  if(typeof VAULT !== 'undefined' && typeof addLedgerEntry === 'function'){
+    addLedgerEntry('in', tier.reward, `VIP ${tier.name} Sandık Hediyesi`);
+  }
+  renderChips();
+  saveDemo();
+  renderVipUI();
+  toast(`👑 <b>Tebrikler! ${tier.name} Sandığı Açıldı!</b> +${fmt(tier.reward)} dürTL hesabına aktarıldı.`);
+}
+
+function renderVipUI(){
+  const info = getVipInfo();
+  const badge = $('vipBadgeIcon');
+  const nameEl = $('vipTierName');
+  const descEl = $('vipStatusDesc');
+  const labelEl = $('vipProgLabel');
+  const pctEl = $('vipProgPct');
+  const barEl = $('vipBarFill');
+  const chestArea = $('vipChestArea');
+
+  if(badge) badge.textContent = info.tier.icon;
+  if(nameEl) nameEl.textContent = `${info.tier.name} Kademe`;
+  if(descEl){
+    if(info.next){
+      descEl.innerHTML = `Hacim: <b>◈ ${fmt(info.wagered)}</b> / ${fmt(info.next.min)} dürTL &nbsp;·&nbsp; Kalan: <b>${fmt(info.remaining)} dürTL</b>`;
+    } else {
+      descEl.innerHTML = `Hacim: <b>◈ ${fmt(info.wagered)} dürTL</b> &nbsp;·&nbsp; <span style="color:var(--gold)">Maksimum VIP Seviyesi</span>`;
+    }
+  }
+  if(labelEl){
+    labelEl.textContent = info.next ? `${info.next.name} Seviyesine İlerleme` : 'Zirvedesin — Dürtü Elmas Ayrıcalığı';
+  }
+  if(pctEl) pctEl.textContent = `%${info.pct}`;
+  if(barEl) barEl.style.width = `${info.pct}%`;
+
+  if(chestArea){
+    const claimed = state.claimedVipChests || [];
+    let html = '';
+    VIP_TIERS.forEach(t => {
+      if(t.reward > 0){
+        const canClaim = info.wagered >= t.min;
+        const isClaimed = claimed.includes(t.id);
+        if(isClaimed){
+          html += `<button type="button" class="btn ghost" disabled style="padding:.3rem .6rem; font-size:.64rem; opacity:.4" title="${t.name} Sandığı Açıldı">🎁 ${t.name} (Açıldı)</button>`;
+        } else if(canClaim){
+          html += `<button type="button" class="btn solid vip-chest-btn" onclick="claimVipChest('${t.id}')" style="padding:.32rem .75rem; font-size:.66rem" title="${t.name} Sandığını Aç">+${fmt(t.reward)} dürTL ${t.name} Sandığı Aç 🎁</button>`;
+        } else {
+          html += `<button type="button" class="btn ghost" disabled style="padding:.3rem .6rem; font-size:.64rem; opacity:.4" title="${t.name} için ${fmt(t.min)} dürTL hacim gerekli">🔒 ${t.name} (${fmt(t.min)})</button>`;
+        }
+      }
+    });
+    chestArea.innerHTML = html;
+  }
+}
+
+/* ================= PROVABLY FAIR (KRİPTOGRAFİK ADİLLİK) ================= */
+function sha256Sync(str) {
+  str = unescape(encodeURIComponent(str));
+  function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let lengthProperty = 'length';
+  let i, j;
+  let result = '';
+  const words = [];
+  const asciiBitLength = str[lengthProperty] * 8;
+  let hash = [];
+  const k = [];
+  let primeCounter = 0;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  str += '\x80';
+  while (str[lengthProperty] % 64 - 56) str += '\x00';
+  for (i = 0; i < str[lengthProperty]; i++) {
+    j = str.charCodeAt(i);
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength | 0);
+  for (j = 0; j < words[lengthProperty];) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const s0 = rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3);
+      const s1 = rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10);
+      w[i] = (i < 16) ? w[i] : (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      const s1h = rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25);
+      const ch = (hash[4] & hash[5]) ^ (~hash[4] & hash[6]);
+      const temp1 = hash[7] + s1h + ch + k[i] + w[i];
+      const s0h = rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22);
+      const maj = (hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]);
+      const temp2 = s0h + maj;
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? '0' : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+function genHex(len){
+  const chars = '0123456789abcdef';
+  let out = '';
+  for(let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * 16)];
+  return out;
+}
+
+const PF = {
+  clientSeed: 'durtu_' + Math.random().toString(36).substring(2, 10),
+  nonce: 1,
+  serverSeed: genHex(64),
+  serverHash: '',
+  lastRound: null
+};
+PF.serverHash = sha256Sync(PF.serverSeed);
+
+function getProvableCrash(serverSeed, clientSeed, nonce){
+  const combined = serverSeed + ':' + clientSeed + ':' + nonce;
+  const hash = sha256Sync(combined);
+  const hex = hash.slice(0, 13);
+  const intVal = parseInt(hex, 16);
+  const maxVal = 4503599627370496; // 2^52
+  if(intVal % 33 === 0) return 1.00;
+  const raw = (0.97 * maxVal) / (maxVal - intVal);
+  return Math.min(60, Math.max(1.01, Math.floor(raw * 100) / 100));
+}
+
+function getProvableMines(serverSeed, clientSeed, nonce, mineCount){
+  const combined = serverSeed + ':' + clientSeed + ':' + nonce;
+  const hash = sha256Sync(combined);
+  const deck = Array.from({length: 25}, (_, i) => i);
+  for(let i = 24; i > 0; i--){
+    const offset = ((24 - i) * 2) % (hash.length - 2);
+    const byteHex = hash.slice(offset, offset + 2);
+    const byteVal = parseInt(byteHex, 16) || 0;
+    const j = byteVal % (i + 1);
+    const temp = deck[i];
+    deck[i] = deck[j];
+    deck[j] = temp;
+  }
+  return deck.slice(0, mineCount);
+}
+
+function updatePfUI(){
+  const h = PF.serverHash ? (PF.serverHash.slice(0, 16) + '...' + PF.serverHash.slice(-8)) : '—';
+  const cEl = $('crPfHash'); if(cEl){ cEl.textContent = 'Hash: ' + h; cEl.title = 'Kilitli Kasa Hash (SHA-256): ' + PF.serverHash; }
+  const mEl = $('mnPfHash'); if(mEl){ mEl.textContent = 'Hash: ' + h; mEl.title = 'Kilitli Kasa Hash (SHA-256): ' + PF.serverHash; }
+}
+
+function openProvablyFairModal(preferGame){
+  openOvl('ovlProvablyFair');
+  const lr = PF.lastRound;
+  if(lr){
+    const match = sha256Sync(lr.serverSeed) === lr.serverHash;
+    $('pfLastGameLabel').textContent = `${lr.game.toUpperCase()} — TUR NO #${lr.nonce}`;
+    $('pfVerifyStatusBadge').textContent = match ? '✅ ŞİFRELEME DOĞRULANDI' : '❌ UYUŞMAZLIK';
+    $('pfVerifyStatusBadge').style.color = match ? 'var(--green)' : 'var(--red)';
+    $('pfLastLockedHash').textContent = lr.serverHash;
+    $('pfLastServerSeed').textContent = lr.serverSeed;
+    $('pfLastClientSeedNonce').textContent = `${lr.clientSeed} : ${lr.nonce}`;
+    $('pfLastOutcome').textContent = `${lr.game} Sonucu: ${lr.outcomeStr}`;
+
+    $('pfCalcServer').value = lr.serverSeed;
+    $('pfCalcClient').value = lr.clientSeed;
+    $('pfCalcNonce').value = lr.nonce;
+    $('pfCalcGame').value = lr.game === 'Mines' ? 'mines' : 'aviator';
+  } else {
+    $('pfLastGameLabel').textContent = 'HENÜZ OYNANMIŞ TUR YOK';
+    $('pfVerifyStatusBadge').textContent = 'ℹ️ HAZIR';
+    $('pfVerifyStatusBadge').style.color = 'var(--gold)';
+    $('pfLastLockedHash').textContent = PF.serverHash;
+    $('pfLastServerSeed').textContent = 'Tur bitiminde açığa çıkacaktır (şu an kilitli)';
+    $('pfLastClientSeedNonce').textContent = `${PF.clientSeed} : ${PF.nonce}`;
+    $('pfLastOutcome').textContent = 'Tur devam ediyor veya henüz başlamadı';
+
+    $('pfCalcServer').value = PF.serverSeed;
+    $('pfCalcClient').value = PF.clientSeed;
+    $('pfCalcNonce').value = PF.nonce;
+    $('pfCalcGame').value = preferGame || 'aviator';
+  }
+  runProvablyFairCalculator();
+}
+
+function runProvablyFairCalculator(){
+  const sSeed = ($('pfCalcServer').value || '').trim();
+  const cSeed = ($('pfCalcClient').value || '').trim();
+  const nonce = parseInt($('pfCalcNonce').value, 10) || 1;
+  const game = $('pfCalcGame').value;
+  const resBox = $('pfCalcResult');
+  if(!sSeed){
+    resBox.classList.remove('hidden');
+    resBox.innerHTML = '<span style="color:var(--red)">Lütfen bir Server Seed girin.</span>';
+    return;
+  }
+  const computedHash = sha256Sync(sSeed);
+  const combined = sSeed + ':' + cSeed + ':' + nonce;
+  const combinedHash = sha256Sync(combined);
+  let outcome = '';
+  if(game === 'aviator'){
+    const crPoint = getProvableCrash(sSeed, cSeed, nonce);
+    outcome = `✈️ Uçak Patlama Noktası: <b style="color:var(--gold)">${crPoint.toFixed(2)}×</b>`;
+  } else {
+    const mines = getProvableMines(sSeed, cSeed, nonce, 3);
+    outcome = `💣 Mayın Konumları (3 Mayın): <b style="color:var(--gold)">${mines.map(p => '#' + (p+1)).join(', ')}</b>`;
+  }
+  resBox.classList.remove('hidden');
+  resBox.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:.35rem;">
+      <div><span class="muted">SHA-256(Server Seed):</span> <code style="word-break:break-all; font-family:monospace; color:var(--gold); font-size:.68rem">${computedHash}</code></div>
+      <div><span class="muted">SHA-256(Tohum Birleşimi):</span> <code style="word-break:break-all; font-family:monospace; color:var(--cream); font-size:.68rem">${combinedHash}</code></div>
+      <div style="margin-top:.3rem; padding-top:.3rem; border-top:1px dashed var(--line); font-size:.82rem">${outcome}</div>
+    </div>
+  `;
+}
 
 const GAMES = [
  {id:'gates', icon:'⚡', name:'Gates of Olympus', cat:'risk', catL:'🎩 Yüksek Risk', rtp:'96.50', vol:'Yüksek', type:'slot',
@@ -1587,6 +1862,8 @@ function snapshot(){
     invites: state.invites, codes: state.codes || [], lastDay: new Date().toDateString(),
     streakDays: state.streakDays || 0, stats: state.stats,
     claimedPromos: state.claimedPromos || [],
+    favorites: state.favorites || [],
+    claimedVipChests: state.claimedVipChests || [],
     ledger: (typeof VAULT !== 'undefined' ? VAULT.ledger : []) };
 }
 function saveDemo(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); }catch(e){} cloudPush(); }
@@ -1605,7 +1882,7 @@ function toast(html){
   setTimeout(()=>{ t.style.transition='all .5s'; t.style.opacity='0'; t.style.transform='translateX(20px)'; }, 3400);
   setTimeout(()=> t.remove(), 4000);
 }
-function renderChips(){ document.querySelectorAll('.chipsVal').forEach(e => e.textContent = fmt(state.chips)); saveDemo(); }
+function renderChips(){ document.querySelectorAll('.chipsVal').forEach(e => e.textContent = fmt(state.chips)); if(typeof renderVipUI === 'function') renderVipUI(); saveDemo(); }
 
 /* Reveal on scroll */
 const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target);} }), {threshold:.12});
@@ -1681,6 +1958,9 @@ function enterApp(name, invited){
     if(sv && sv.stats) state.stats = sv.stats;
     if(sv && typeof sv.invites === 'number') state.invites = sv.invites;
     if(sv && Array.isArray(sv.codes)) state.codes = sv.codes;
+    if(sv && Array.isArray(sv.claimedPromos)) state.claimedPromos = sv.claimedPromos;
+    if(sv && Array.isArray(sv.favorites)) state.favorites = sv.favorites;
+    if(sv && Array.isArray(sv.claimedVipChests)) state.claimedVipChests = sv.claimedVipChests;
     const today = new Date().toDateString();
     if(!sv || sv.lastDay !== today){
       const y = new Date(Date.now() - 864e5).toDateString();
@@ -1712,7 +1992,7 @@ function enterApp(name, invited){
   // Budget ring
   setTimeout(()=>{ $('ringFg').style.strokeDashoffset = (213.6 * 0.30).toFixed(1); }, 700);
 
-  renderChips(); renderGames('all'); updateSeals();
+  renderChips(); renderGames('all'); updateSeals(); renderVipUI(); updatePfUI();
   if(_ritualMsg){ const rm = _ritualMsg; _ritualMsg = null; setTimeout(()=> toast(rm), 3300); }
   setTimeout(()=> toast('<b>Hoş geldin, ' + esc(name) + '.</b> Bugün senin için 3 seçki hazırlandı.'), 900);
   if(lobby > 0) setTimeout(()=> toast('🎰 <b>Lobi kazancın aktarıldı:</b> +' + fmt(lobby) + ' dürTL — minik makineler işe yaradı.'), 2000);
@@ -1730,20 +2010,96 @@ function addBanner(icon, text, btn, fn){
 $('burger').onclick = () => $('navLinks').classList.toggle('open');
 document.querySelectorAll('.nav-links a').forEach(a => a.onclick = () => $('navLinks').classList.remove('open'));
 
+/* ================= FAVORİLER & ARAMA ================= */
+function toggleFavorite(e, gameId){
+  if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  if(!Array.isArray(state.favorites)) state.favorites = [];
+  const idx = state.favorites.indexOf(gameId);
+  const g = GAMES.find(x => x.id === gameId);
+  const name = g ? g.name : gameId;
+  if(idx > -1){
+    state.favorites.splice(idx, 1);
+    toast(`♡ <b>${name}</b> favorilerden çıkarıldı.`);
+  } else {
+    state.favorites.push(gameId);
+    toast(`❤️ <b>${name}</b> favorilerine eklendi.`);
+  }
+  saveDemo();
+  updateFavCount();
+  renderGames(state.filter || 'all');
+}
+
+function updateFavCount(){
+  const count = (state.favorites || []).length;
+  const el = $('favCount'); if(el) el.textContent = count;
+}
+
+function filterLobbyGames(){
+  const s = $('gameSearch');
+  const clr = $('searchClearBtn');
+  if(clr) clr.classList.toggle('hidden', !s || !s.value);
+  renderGames(state.filter || 'all');
+}
+
+function clearGameSearch(){
+  const s = $('gameSearch');
+  if(s){ s.value = ''; filterLobbyGames(); s.focus(); }
+}
+
 /* ================= GAMES ================= */
 function renderGames(filter){
+  state.filter = filter || state.filter || 'all';
+  updateFavCount();
   const g = $('ggrid'); g.innerHTML = '';
   for(let i = 0; i < 6; i++)
     g.insertAdjacentHTML('beforeend', '<div class="gcard skel"><div class="skl tall"></div><div class="skl"></div><div class="skl w60"></div></div>');
   API.games().then(list => {
     g.innerHTML = '';
-    list.filter(x => filter === 'all' || x.cat === filter).forEach(x => {
+    const q = ($('gameSearch') ? $('gameSearch').value.trim().toLowerCase() : '');
+    const favs = state.favorites || [];
+
+    let filtered = list;
+    if(state.filter === 'fav'){
+      filtered = filtered.filter(x => favs.includes(x.id));
+    } else if(state.filter !== 'all'){
+      filtered = filtered.filter(x => x.cat === state.filter);
+    }
+
+    if(q){
+      filtered = filtered.filter(x => 
+        (x.name && x.name.toLowerCase().includes(q)) ||
+        (x.catL && x.catL.toLowerCase().includes(q)) ||
+        (x.vol && x.vol.toLowerCase().includes(q)) ||
+        (x.type && x.type.toLowerCase().includes(q)) ||
+        (x.note && x.note.toLowerCase().includes(q)) ||
+        (x.rtp && x.rtp.includes(q))
+      );
+    }
+
+    if(filtered.length === 0){
+      g.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem 1rem; color:var(--muted); border:1px dashed var(--line); border-radius:4px">
+        <div style="font-size:2rem; margin-bottom:.5rem">${state.filter === 'fav' ? '♡' : '🔍'}</div>
+        <p style="color:var(--cream); font-weight:400; margin-bottom:.3rem">${state.filter === 'fav' ? 'Henüz favori oyunun yok' : 'Aramaya uygun oyun bulunamadı'}</p>
+        <p style="font-size:.76rem; line-height:1.5">${state.filter === 'fav' ? 'Kartlardaki kalp ikonuna (♡) basarak beğendiğin oyunları buraya sabitleyebilirsin.' : `"${esc(q)}" için sonuç yok.`}</p>
+        ${state.filter === 'fav' ? '<button class="btn" style="margin-top:.8rem" onclick="setFilter(\'all\',false)">Tüm Oyunları Gör</button>' : '<button class="btn" style="margin-top:.8rem" onclick="clearGameSearch()">Aramayı Temizle</button>'}
+      </div>`;
+      return;
+    }
+
+    filtered.forEach(x => {
+      const isFav = favs.includes(x.id);
       const c = document.createElement('div');
       c.className = 'gcard';
-      c.innerHTML = `<div class="ic">${x.icon}</div><h3>${x.name}</h3>
+      c.style.position = 'relative';
+      c.innerHTML = `
+        <button type="button" class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${x.id}')" title="${isFav ? 'Favorilerden çıkar' : 'Favorilere ekle'}" aria-label="Favori">
+          ${isFav ? '❤️' : '♡'}
+        </button>
+        <div class="ic">${x.icon}</div>
+        <h3>${x.name}</h3>
         <div class="meta">RTP %${x.rtp} · ${x.vol}</div>
         <div class="note">“${x.note}”</div>
-        <div style="margin-top:1rem"><span class="tag" style="letter-spacing:.2em">${x.type==='slot'?'Oyna →':x.type==='crash'?'Uç →':'Masaya git →'}</span></div>`;
+        <div style="margin-top:1rem"><span class="tag" style="letter-spacing:.2em">${x.type==='slot'?'Oyna →':x.type==='crash'?'Uç →':x.type==='mines'?'Mayınlar →':'Masaya git →'}</span></div>`;
       c.onclick = () => x.type==='slot' ? openSlot(x.id) : x.type==='crash' ? openCrash() : x.type==='mines' ? openMines() : openTable(x.id);
       g.appendChild(c);
     });
@@ -2337,7 +2693,7 @@ const CR = { open:false, running:false, cashed:false, m:1, crash:1, bet:10, oto:
 const CR_NAMES = ['M*** K***','A*** Y***','S*** D***','E*** T***','B*** Ö***','H*** Ç***','Z*** A***','K*** Ş***','N*** V***','T*** G***'];
 
 function crFit(){ const d = Math.min(2, window.devicePixelRatio || 1); CRC.width = CRW*d; CRC.height = CRH*d; CX2.setTransform(d,0,0,d,0,0); }
-function crashPoint(){ const p = 0.97/(1-Math.random()); return Math.min(60, Math.max(1, Math.floor(p*100)/100)); }
+function crashPoint(){ return getProvableCrash(PF.serverSeed, PF.clientSeed, PF.nonce); }
 
 function crHum(on){
   try{
@@ -2391,6 +2747,7 @@ function openCrash(){
   CR.pts = [[0,1]]; CR.m = 1; crBal();
   $('crOvl').classList.add('hidden');
   crDraw(0);
+  updatePfUI();
 }
 function crQuit(){
   if(CR.running && !CR.cashed){
@@ -2411,7 +2768,26 @@ function crStart(){
   try{
   st().wagered += bet;
   CR.running = true; CR.cashed = false;
-  CR.m = 1; CR.bet = bet; CR.crash = crashPoint();
+  CR.m = 1; CR.bet = bet;
+
+  const roundServerSeed = PF.serverSeed;
+  const roundServerHash = PF.serverHash;
+  const roundClientSeed = PF.clientSeed;
+  const roundNonce = PF.nonce;
+  CR.crash = getProvableCrash(roundServerSeed, roundClientSeed, roundNonce);
+  PF.lastRound = {
+    game: 'Aviator',
+    serverSeed: roundServerSeed,
+    serverHash: roundServerHash,
+    clientSeed: roundClientSeed,
+    nonce: roundNonce,
+    result: CR.crash,
+    outcomeStr: CR.crash.toFixed(2) + '×'
+  };
+  PF.nonce++;
+  PF.serverSeed = genHex(64);
+  PF.serverHash = sha256Sync(PF.serverSeed);
+  updatePfUI();
   CR.pts = [[0,1]];
   CR.oto = parseFloat(($('crOto').value || '').replace(',', '.')) || 0;
   $('crMsg').textContent = 'Uçak havada. Çıkışını bekle…';
@@ -3472,6 +3848,7 @@ function mnOpen(){
   $('mnCount').disabled = false;
   $('mnMsg').className = 'bj-msg'; $('mnMsg').textContent = 'Bahis ve mayın sayısını seç, tarlayı başlat.';
   mnChipRow(); mnStat(1, '—'); mnBal();
+  updatePfUI();
   const g = $('mnGrid'); g.innerHTML = '';
   for(let i = 0; i < 25; i++){
     const t = document.createElement('button');
@@ -3500,9 +3877,27 @@ function mnStart(){
   state.chips -= bet; renderChips(); mnBal();
   st().wagered += bet; st().spins++;
   MN.playing = true; MN.safe = 0;
+
+  const roundServerSeed = PF.serverSeed;
+  const roundServerHash = PF.serverHash;
+  const roundClientSeed = PF.clientSeed;
+  const roundNonce = PF.nonce;
+  const minePositions = getProvableMines(roundServerSeed, roundClientSeed, roundNonce, MN.mines);
   MN.grid = Array(25).fill(false);
-  let placed = 0;
-  while(placed < MN.mines){ const i = Math.random()*25|0; if(!MN.grid[i]){ MN.grid[i] = true; placed++; } }
+  minePositions.forEach(idx => { MN.grid[idx] = true; });
+  PF.lastRound = {
+    game: 'Mines',
+    serverSeed: roundServerSeed,
+    serverHash: roundServerHash,
+    clientSeed: roundClientSeed,
+    nonce: roundNonce,
+    result: minePositions,
+    outcomeStr: minePositions.map(p => '#' + (p + 1)).join(', ') + ' (' + MN.mines + ' mayın)'
+  };
+  PF.nonce++;
+  PF.serverSeed = genHex(64);
+  PF.serverHash = sha256Sync(PF.serverSeed);
+  updatePfUI();
   for(let i = 0; i < 25; i++){
     const t = $('mni-' + i);
     t.disabled = false; t.className = 'mtile'; t.textContent = '';
@@ -3765,6 +4160,9 @@ function openStats(){
   netEl.classList.toggle('red', net < 0);
   $('stBig').textContent = fmt(s2.big);
   $('stCrash').textContent = (typeof CR !== 'undefined' && CR.best) ? CR.best.toFixed(2) + '×' : '—';
+  const vInfo = getVipInfo(s2.wagered);
+  const stVipEl = $('stVip');
+  if(stVipEl) stVipEl.innerHTML = `${vInfo.tier.name} ${vInfo.tier.icon} (${vInfo.pct}%)`;
   $('stStreak').textContent = (state.streakDays || 1) + ' gün';
   let v;
   if(s2.spins === 0 && !((typeof CR !== 'undefined') && CR.best)) v = '“Henüz perde açılmadı. İlk dönüşünü bekliyoruz.”';

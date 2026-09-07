@@ -61,7 +61,7 @@ globalThis.setTimeout = () => 0; globalThis.setInterval = () => 0; globalThis.cl
 
 /* ---------- 3) Uygulamayı bu bağlamda çalıştır ---------- */
 const run = new Function('document', 'window', 'localStorage', 'navigator', 'performance', 'requestAnimationFrame', 'cancelAnimationFrame', 'IntersectionObserver', 'MutationObserver', 'fetch', 'AudioContext', 'webkitAudioContext',
-  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null }');
+  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null, sha256Sync: typeof sha256Sync !== \"undefined\" ? sha256Sync : null, getProvableCrash: typeof getProvableCrash !== \"undefined\" ? getProvableCrash : null, getProvableMines: typeof getProvableMines !== \"undefined\" ? getProvableMines : null, PF: typeof PF !== \"undefined\" ? PF : null, VIP_TIERS: typeof VIP_TIERS !== \"undefined\" ? VIP_TIERS : null, getVipInfo: typeof getVipInfo !== \"undefined\" ? getVipInfo : null, claimVipChest: typeof claimVipChest !== \"undefined\" ? claimVipChest : null, toggleFavorite: typeof toggleFavorite !== \"undefined\" ? toggleFavorite : null }');
 let app;
 try {
   app = run(document, window, localStorage, navigator, performance, requestAnimationFrame, cancelAnimationFrame, IntersectionObserver, MutationObserver, fetch, ACStub, ACStub);
@@ -194,6 +194,69 @@ console.log('\n🎁 Promosyon Kodları:');
   inp.value = 'DURTU2026';
   app.claimPromoCode();
   T('Aynı kod ikinci kez kullanılamaz (çift kullanım engeli)', app.state.chips === afterFirstClaim);
+}
+
+/* ---------- 8.7) Provably Fair (Kriptografik Adillik) ---------- */
+console.log('\n🛡️ Provably Fair:');
+{
+  const sha = app.sha256Sync;
+  T('SHA-256 motoru standarda uygun (boş girdi test vektörü)', sha('') === 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+  T('SHA-256 motoru standarda uygun ("abc" test vektörü)', sha('abc') === 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+
+  // Crash determinizmi testi
+  const sSeed = 'a1b2c3d4e5f67890a1b2c3d4e5f67890a1b2c3d4e5f67890a1b2c3d4e5f67890';
+  const cSeed = 'client_test_seed';
+  const crash1 = app.getProvableCrash(sSeed, cSeed, 1);
+  const crash2 = app.getProvableCrash(sSeed, cSeed, 1);
+  T('Aynı tohumlarla Aviator sonucu %100 deterministiktir', crash1 === crash2 && crash1 >= 1.00);
+
+  // Mines determinizmi ve benzersiz karo testi
+  const mines1 = app.getProvableMines(sSeed, cSeed, 1, 3);
+  const mines2 = app.getProvableMines(sSeed, cSeed, 1, 3);
+  T('Aynı tohumlarla Mines mayınları %100 deterministiktir', JSON.stringify(mines1) === JSON.stringify(mines2));
+  T('Mines 3 mayın tam olarak 3 benzersiz karo seçer', mines1.length === 3 && new Set(mines1).size === 3);
+  T('Mayın karoları 0-24 sınırları içindedir', mines1.every(p => p >= 0 && p < 25));
+}
+
+/* ---------- 8.8) VIP Kulüp Kademeleri & Sandıklar ---------- */
+console.log('\n👑 VIP Kulüp & Sandıklar:');
+{
+  const vInfo0 = app.getVipInfo(0);
+  T('0 hacim Bronz kademedir', vInfo0.tier.id === 'bronz' && vInfo0.pct === 0);
+
+  const vInfoGumus = app.getVipInfo(5000);
+  T('5.000 hacim Gümüş kademedir', vInfoGumus.tier.id === 'gumus');
+
+  const vInfoAltin = app.getVipInfo(20000);
+  T('20.000 hacim Altın kademedir', vInfoAltin.tier.id === 'altin');
+
+  // Sandık açma
+  app.ST().wagered = 6000; // Gümüşe hak kazandı
+  const beforeChestChips = app.state.chips;
+  app.claimVipChest('gumus');
+  T('Gümüş sandığı açılınca 500 dürTL eklenir', app.state.chips === beforeChestChips + 500);
+  T('Açılan sandık claimedVipChests içine işlenir', app.state.claimedVipChests.includes('gumus'));
+
+  // Çift sandık açma engeli
+  const afterChestChips = app.state.chips;
+  app.claimVipChest('gumus');
+  T('Aynı sandık ikinci kez açılamaz', app.state.chips === afterChestChips);
+
+  // Yetkisiz kademe sandığı engeli (Altın için 20.000 gerek, şu an 6.000)
+  app.claimVipChest('altin');
+  T('Yetersiz hacimde üst kademe sandığı açılamaz', !app.state.claimedVipChests.includes('altin'));
+}
+
+/* ---------- 8.9) Lobi Favorileri ---------- */
+console.log('\n❤️ Lobi Favorileri:');
+{
+  app.state.favorites = [];
+  app.toggleFavorite(null, 'gates');
+  T('Favorilere ekleme state.favorites dizisine yansır', app.state.favorites.includes('gates'));
+  app.toggleFavorite(null, 'mines');
+  T('Birden fazla oyun favorilere eklenebilir', app.state.favorites.length === 2 && app.state.favorites.includes('mines'));
+  app.toggleFavorite(null, 'gates');
+  T('Aynı oyun tekrar tıklandığında favorilerden çıkarılır', !app.state.favorites.includes('gates') && app.state.favorites.length === 1);
 }
 
 /* ---------- 9) Sonuç ---------- */
