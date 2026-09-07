@@ -147,6 +147,12 @@ h2.sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var
 .gcard h3{font-family:var(--serif);font-size:1.02rem;font-weight:600;margin:.55rem 0 .3rem}
 .gcard .meta{font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
 .gcard .note{font-family:var(--serif);font-style:italic;font-size:.78rem;color:var(--muted);line-height:1.55;border-left:2px solid var(--line);padding-left:.7rem}
+.fav-btn{position:absolute;top:.75rem;right:.75rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.92rem;color:var(--muted);transition:all .25s;z-index:2}
+.fav-btn:hover{background:rgba(212,175,55,.15);border-color:var(--gold-dim);transform:scale(1.12)}
+.fav-btn.active{color:#ff4d6d;border-color:rgba(255,77,109,.3);background:rgba(255,77,109,.12)}
+.vip-strip{background:linear-gradient(135deg,rgba(212,175,55,.12) 0%,rgba(18,18,16,.95) 75%);border:1px solid var(--line);border-radius:6px;padding:1.1rem 1.3rem;margin:1.4rem 0}
+.vip-chest-btn{background:linear-gradient(135deg,#D4AF37,#f6e27a);color:#000;font-weight:600;border:none;box-shadow:0 0 15px rgba(212,175,55,.4)}
+.pf-bar{background:rgba(255,255,255,.03);border:1px solid rgba(212,175,55,.15);border-radius:4px;padding:.5rem .8rem;display:flex;justify-content:space-between;align-items:center;margin-top:.8rem}
 
 /* Etkinlikler */
 .tl{position:relative;padding-left:1.6rem}
@@ -680,6 +686,32 @@ body.tick footer{padding-bottom:34px}
         <div class="banners" id="banners"></div>
       </div>
 
+      <!-- VIP KULÜP KADEMESİ & İLERLEME ÇUBUĞU -->
+      <div class="vip-strip rv" id="vipStrip">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.8rem;">
+          <div style="display:flex; align-items:center; gap:.85rem;">
+            <div id="vipBadgeIcon" style="font-size:1.6rem; width:46px; height:46px; border-radius:50%; background:rgba(212,175,55,.12); display:flex; align-items:center; justify-content:center; border:1px solid var(--gold-dim); flex-shrink:0;">🥉</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:.5rem;">
+                <span class="tag" style="letter-spacing:.25em">VIP KULÜP KADEMESİ</span>
+                <span id="vipTierName" style="color:var(--gold); font-weight:600; font-size:.88rem">Bronz Üye</span>
+              </div>
+              <div style="font-size:.76rem; color:var(--muted); margin-top:.2rem;" id="vipStatusDesc">Hacim: ◈ 0 / 5.000 dürTL</div>
+            </div>
+          </div>
+          <div id="vipChestArea" style="display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;"></div>
+        </div>
+        <div style="margin-top:.9rem;">
+          <div style="display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); margin-bottom:.35rem;">
+            <span id="vipProgLabel">Gümüş Seviyesine İlerleme</span>
+            <b id="vipProgPct" style="color:var(--gold)">%0</b>
+          </div>
+          <div style="height:7px; background:rgba(255,255,255,.07); border-radius:4px; overflow:hidden; position:relative;">
+            <div id="vipBarFill" style="height:100%; width:0%; background:linear-gradient(90deg,#8a6d1f 0%,#D4AF37 50%,#f6e27a 100%); transition:width .6s cubic-bezier(.22,1,.36,1); border-radius:4px;"></div>
+          </div>
+        </div>
+      </div>
+
       <h2 class="sect rv">Bugün senin için hazırlananlar</h2>
       <div class="picks rv">
         <div class="pick">
@@ -774,8 +806,16 @@ body.tick footer{padding-bottom:34px}
     <section id="secki">
       <span class="tag rv">Küratörün Seçkisi</span>
       <h2 class="sect rv">5.000 oyun değil. Senin için seçilmiş 9 oyun.</h2>
+
+      <!-- Lobi Arama Çubuğu -->
+      <div class="search-bar rv" style="margin:1rem 0 .9rem; position:relative; max-width:440px;">
+        <input id="gameSearch" type="text" class="inp" placeholder="🔍 Oyun veya kategori ara (Gates, Rulet, Slot, 98%...)" oninput="filterLobbyGames()" style="padding:.65rem 2.2rem .65rem .9rem; font-size:.82rem; background:var(--card2); border:1px solid var(--line); border-radius:4px;">
+        <button id="searchClearBtn" type="button" onclick="clearGameSearch()" class="hidden" style="position:absolute; right:.6rem; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); font-size:.85rem; cursor:pointer; padding:2px 6px;" title="Temizle">✕</button>
+      </div>
+
       <div class="filters rv" id="filters">
         <button class="chip on" data-f="all">Tümü</button>
+        <button class="chip" data-f="fav" id="chipFav">❤️ Favorilerim (<span id="favCount">0</span>)</button>
         <button class="chip" data-f="risk">🎩 Yüksek Risk, Yüksek Ödül</button>
         <button class="chip" data-f="calm">🍷 Uzun Akşam</button>
         <button class="chip" data-f="adren">⚡ Adrenalin</button>
@@ -1007,6 +1047,13 @@ body.tick footer{padding-bottom:34px}
       <button class="btn spin-btn" id="crCashBtn" onclick="crCash()" disabled>NAKİT ÇIKIŞ<span id="crCashVal" style="display:block;font-size:.62rem;letter-spacing:.08em;opacity:.75;margin-top:.2rem"></span></button>
     </div>
     <div class="slot-foot"><span class="muted" id="crMsg">Tur hazır. Uçak seni bekliyor.</span><span class="muted" id="crBalance"></span></div>
+    <div class="pf-bar">
+      <div style="display:flex; align-items:center; gap:.5rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+        <span style="color:var(--gold); font-weight:600; font-size:.72rem">🛡️ Adil Oyun:</span>
+        <span class="muted" style="font-family:monospace; font-size:.68rem" id="crPfHash" title="Kilitli Kasa Hash'i (SHA-256)">Kilitli Hash yükleniyor...</span>
+      </div>
+      <button type="button" class="btn ghost" style="padding:.22rem .55rem; font-size:.62rem; letter-spacing:.08em" onclick="openProvablyFairModal('aviator')">Doğrula ➔</button>
+    </div>
   </div>
 </div>
 
@@ -1085,6 +1132,13 @@ body.tick footer{padding-bottom:34px}
       <button class="btn solid hidden" id="mnCashBtn" onclick="mnCash()">KASAYA GİR</button>
     </div>
     <div class="slot-foot"><span class="muted">Çarpanlar gerçek kombinatorik — ev payı %3</span><span class="muted" id="mnBal"></span></div>
+    <div class="pf-bar">
+      <div style="display:flex; align-items:center; gap:.5rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+        <span style="color:var(--gold); font-weight:600; font-size:.72rem">🛡️ Adil Oyun:</span>
+        <span class="muted" style="font-family:monospace; font-size:.68rem" id="mnPfHash" title="Kilitli Kasa Hash'i (SHA-256)">Kilitli Hash yükleniyor...</span>
+      </div>
+      <button type="button" class="btn ghost" style="padding:.22rem .55rem; font-size:.62rem; letter-spacing:.08em" onclick="openProvablyFairModal('mines')">Doğrula ➔</button>
+    </div>
   </div>
 </div>
 
@@ -1222,6 +1276,63 @@ body.tick footer{padding-bottom:34px}
     <div class="persona-grid" id="personaGrid"></div>
     <div style="text-align:center;margin-top:1rem"><button class="taglink" id="speakBtn" onclick="toggleSpeak()">🔈 Sesli melek: <b>açık</b></button></div>
     <p class="muted" style="font-size:.66rem;margin-top:.8rem;line-height:1.7">Yakında dürTL ile açılanlar: kapalı turnuva girişi · masa önceliği · gece DJ’ine istek hattı.</p>
+</div>
+
+<!-- PROVABLY FAIR DOĞRULAMA MODALI -->
+<div id="ovlProvablyFair" class="ovl hidden" onclick="ovlSelfClose(event,this)">
+  <div class="pnl" style="width:min(580px,100%)">
+    <button class="close" onclick="closeOvl('ovlProvablyFair')">✕</button>
+    <span class="tag">🛡️ Kriptografik Güvence</span>
+    <h3 style="margin-bottom:.3rem">Doğrulanabilir Adillik (Provably Fair)</h3>
+    <p class="noteline">DÜRTÜ, her turun sonucunu tur başlamadan önce SHA-256 ile kilitler. Kasa veya oyuncu sonuca sonradan müdahale edemez.</p>
+    
+    <!-- Son Tur İncelemesi -->
+    <div style="background:rgba(212,175,55,.05); border:1px solid var(--line); border-radius:4px; padding:.9rem; margin-bottom:1.2rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.6rem;">
+        <span class="tag" style="letter-spacing:.2em" id="pfLastGameLabel">SON TUR SONUCU</span>
+        <span id="pfVerifyStatusBadge" style="font-size:.72rem; color:var(--green); font-weight:600">✅ ŞİFRELEME DOĞRULANDI</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:.5rem; font-size:.76rem;">
+        <div><span class="muted">Önceden Kilitlenen Hash (SHA-256):</span><br><code id="pfLastLockedHash" style="color:var(--gold); font-size:.7rem; word-break:break-all; font-family:monospace">—</code></div>
+        <div><span class="muted">Açığa Çıkan Kasa Anahtarı (Server Seed):</span><br><code id="pfLastServerSeed" style="color:var(--cream); font-size:.7rem; word-break:break-all; font-family:monospace">—</code></div>
+        <div><span class="muted">İstemci Anahtarı (Client Seed) : Nonce (Tur):</span><br><code id="pfLastClientSeedNonce" style="color:var(--cream); font-size:.72rem; font-family:monospace">—</code></div>
+        <div><span class="muted">Kriptografik Olarak Üretilen Kesin Sonuç:</span><br><b id="pfLastOutcome" style="color:var(--gold); font-size:.9rem">—</b></div>
+      </div>
+    </div>
+
+    <!-- Canlı Doğrulama Hesaplayıcısı -->
+    <div style="background:var(--card2); border:1px solid rgba(255,255,255,.07); border-radius:4px; padding:.9rem;">
+      <span class="tag" style="letter-spacing:.15em">KENDİN HESAPLA & DOĞRULA</span>
+      <p style="font-size:.72rem; color:var(--muted); margin:.3rem 0 .7rem;">İstediğin parametreleri girerek SHA-256 özetini ve oyun sonucunu bağımsız hesapla:</p>
+      <div style="display:flex; flex-direction:column; gap:.6rem;">
+        <div>
+          <label style="margin:0 0 .25rem; font-size:.62rem;">Kasa Anahtarı (Server Seed)</label>
+          <input id="pfCalcServer" class="inp" style="padding:.5rem .7rem; font-size:.74rem; font-family:monospace" placeholder="64 karakter hex seed">
+        </div>
+        <div style="display:flex; gap:.6rem;">
+          <div style="flex:2">
+            <label style="margin:0 0 .25rem; font-size:.62rem;">İstemci Anahtarı (Client Seed)</label>
+            <input id="pfCalcClient" class="inp" style="padding:.5rem .7rem; font-size:.74rem; font-family:monospace" placeholder="Örn: durtu_seed_123">
+          </div>
+          <div style="flex:1">
+            <label style="margin:0 0 .25rem; font-size:.62rem;">Nonce (Tur)</label>
+            <input id="pfCalcNonce" type="number" class="inp" style="padding:.5rem .7rem; font-size:.74rem; font-family:monospace" value="1">
+          </div>
+        </div>
+        <div style="display:flex; gap:.6rem; align-items:flex-end;">
+          <div style="flex:1">
+            <label style="margin:0 0 .25rem; font-size:.62rem;">Oyun Türü</label>
+            <select id="pfCalcGame" class="inp" style="padding:.5rem .7rem; font-size:.74rem;">
+              <option value="aviator">✈️ Aviator (Crash)</option>
+              <option value="mines">💣 Mines (3 Mayın)</option>
+            </select>
+          </div>
+          <button type="button" class="btn solid" style="padding:.6rem 1rem; font-size:.72rem;" onclick="runProvablyFairCalculator()">HESAPLA</button>
+        </div>
+      </div>
+      <div id="pfCalcResult" class="hidden" style="margin-top:.8rem; padding:.7rem; background:rgba(0,0,0,.4); border:1px dashed var(--line); border-radius:3px; font-size:.75rem;">
+      </div>
+    </div>
   </div>
 </div>
 
