@@ -312,7 +312,7 @@ function copyText(txt, msg){
     () => toast(txt));
 }
 function copyInviteTemplate(name, code, email){
-  const text = `Sayın ${name},\n\nDÜRTÜ — Kapalı Kulüp üyeliğiniz onaylanmıştır.\nÖzel kapı davetiyeniz: ${code}\n\nSalona giriş için: https://d-rt.vercel.app\n\nİyi şanslar dileriz.\nDÜRTÜ Küratörlüğü`;
+  const text = `Sayın ${name},\n\nDÜRTÜ — Kapalı Kulüp üyeliğiniz onaylanmıştır.\nÖzel kapı davetiyeniz: ${code}\n\nSalona giriş için: https://durtu.vercel.app\n\nİyi şanslar dileriz.\nDÜRTÜ Küratörlüğü`;
   (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(
     () => toast(`✉️ <b>${name}</b> için davet mektubu panoya kopyalandı!`),
     () => toast(`Davet kodu: ${code}`));
