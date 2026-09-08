@@ -125,9 +125,16 @@ canvas.spark{width:100%;height:64px;display:block}
 
     <!-- BAŞVURULAR -->
     <section id="sec-apps" class="hidden">
-      <span class="tag">Kapıdaki Kuyruk</span>
-      <h1>Üyelik Başvuruları</h1>
-      <p class="muted" style="font-size:.74rem;margin-bottom:1.1rem;line-height:1.7">Onay, davet kodu üretir ve üye tarafının kilitli kapısına tanıtır (<b style="color:var(--gold)">EV-XXXX</b>). Reddetmek de bir kürasyondur.</p>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; margin-bottom:.6rem;">
+        <div>
+          <span class="tag">Kapıdaki Kuyruk</span>
+          <h1 style="margin:0">Üyelik Başvuruları</h1>
+        </div>
+        <button class="btn" onclick="exportAppsCSV()" style="padding:.5rem 1rem; font-size:.66rem; display:flex; align-items:center; gap:.4rem;">
+          📥 Başvuruları CSV / Excel İndir
+        </button>
+      </div>
+      <p class="muted" style="font-size:.74rem;margin-bottom:1.1rem;line-height:1.7">Onay, davet kodu üretir ve üye tarafının kilitli kapısına tanıtır (<b style="color:var(--gold)">EV-XXXX</b>). E-posta ve Telegram iletişim bilgileri buradan kopyalanabilir.</p>
       <div id="appsList"></div>
     </section>
 
@@ -180,13 +187,13 @@ function toast(html){ const t=document.createElement('div');t.className='toast';
 function seedApps(){
   if(ls.get('durtu_apps', null)) return;
   ls.set('durtu_apps', [
-    { id:'ASEED1', name:'D. Yıldırım', type:'Masa Oyunları', budget:'25.000 – 100.000 TL',
+    { id:'ASEED1', name:'D. Yıldırım', email:'dyildirim@vipmail.com', contact:'@dyildirim', type:'Masa Oyunları', budget:'25.000 – 100.000 TL',
       why:'Kalabalık sitelerden yoruldum. Az ama öz olsun istiyorum. Krupiyeyle iki çift laf edebileceğim masa benim evimdir.',
       ts: Date.now()-36e5*5, status:'pending' },
-    { id:'ASEED2', name:'Kerem A.', type:'Crash', budget:'5.000 – 25.000 TL',
+    { id:'ASEED2', name:'Kerem A.', email:'kerem.a@proton.me', contact:'@keremcrash', type:'Crash', budget:'5.000 – 25.000 TL',
       why:'Refleksim iyidir, karar vermekte hızlıyımdır. Aviator dışında crash oynamam. Disiplin benim işim.',
       ts: Date.now()-36e5*11, status:'pending' },
-    { id:'ASEED3', name:'N. Vural', type:'Slot', budget:'5.000 TL altı',
+    { id:'ASEED3', name:'N. Vural', email:'nvural99@gmail.com', contact:'+90 532 555 0199', type:'Slot', budget:'5.000 TL altı',
       why:'Akşamları kafa dağıtmak için oynuyorum. Bütçem bellidir, limitimi bilirim. Sakin seçki arıyorum.',
       ts: Date.now()-36e5*26, status:'pending' },
   ]);
@@ -256,6 +263,10 @@ function renderApps(){
         <span class="st ${a.status}">${a.status === 'pending' ? 'bekliyor' : a.status === 'approved' ? 'onaylandı ✓' : 'reddedildi ✕'}</span>
         <span class="muted" style="font-size:.6rem;margin-left:auto">${new Date(a.ts).toLocaleString('tr-TR')}</span>
       </div>
+      <div style="display:flex;gap:.5rem;align-items:center;margin:.35rem 0 .5rem;flex-wrap:wrap;font-size:.72rem">
+        <span class="pill gold" style="cursor:pointer" onclick="copyText('${esc(a.email || '')}', 'E-posta kopyalandı')">✉️ ${esc(a.email || 'E-posta girilmedi')}</span>
+        ${a.contact ? `<span class="pill" style="cursor:pointer" onclick="copyText('${esc(a.contact)}', 'İletişim bilgisi kopyalandı')">💬 ${esc(a.contact)}</span>` : ''}
+      </div>
       <div class="chips">
         <span class="pill">${esc(a.type)}</span><span class="pill">${esc(a.budget)}</span><span class="pill">${a.id}</span>
       </div>
@@ -266,8 +277,8 @@ function renderApps(){
              <button class="btn danger" onclick="decide('${a.id}', false)">Reddet</button>`
           : a.status === 'approved'
             ? `<span class="muted" style="font-size:.66rem">Davet kodu:</span>
-               <span class="code-chip" onclick="copyCode(this, '${a.code}')" title="Kopyala">${a.code}</span>
-               <span class="muted" style="font-size:.6rem">— üye tarafının kapısında geçerli</span>`
+               <span class="code-chip" onclick="copyCode(this, '${a.code}')" title="Kodu Kopyala">${a.code}</span>
+               <button class="btn ghost" style="padding:.25rem .6rem;font-size:.58rem" onclick="copyInviteTemplate('${esc(a.name)}', '${a.code}', '${esc(a.email||'')}')">✉️ Davet Metnini Kopyala</button>`
             : '<span class="muted" style="font-size:.66rem">Dosya kapandı.</span>'}
       </div>
     </div>`).join('');
@@ -293,6 +304,45 @@ function copyCode(el, c){
   (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(
     () => toast('Kod kopyalandı: <b>' + c + '</b>'),
     () => toast('Kod: <b>' + c + '</b>'));
+}
+function copyText(txt, msg){
+  if(!txt) return;
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(
+    () => toast('📋 <b>' + msg + '</b>: ' + txt),
+    () => toast(txt));
+}
+function copyInviteTemplate(name, code, email){
+  const text = `Sayın ${name},\n\nDÜRTÜ — Kapalı Kulüp üyeliğiniz onaylanmıştır.\nÖzel kapı davetiyeniz: ${code}\n\nSalona giriş için: https://d-rt.vercel.app\n\nİyi şanslar dileriz.\nDÜRTÜ Küratörlüğü`;
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(
+    () => toast(`✉️ <b>${name}</b> için davet mektubu panoya kopyalandı!`),
+    () => toast(`Davet kodu: ${code}`));
+}
+function exportAppsCSV(){
+  const apps = games();
+  if(!apps.length){ toast('Dışa aktarılacak başvuru kaydı yok.'); return; }
+  const headers = ['ID', 'İsim', 'E-Posta', 'İletişim', 'Oyun Türü', 'Aylık Bütçe', 'Gerekçe', 'Durum', 'Davet Kodu', 'Başvuru Tarihi'];
+  const rows = apps.map(a => [
+    a.id || '',
+    (a.name || '').replace(/"/g, '""'),
+    (a.email || '').replace(/"/g, '""'),
+    (a.contact || '').replace(/"/g, '""'),
+    (a.type || '').replace(/"/g, '""'),
+    (a.budget || '').replace(/"/g, '""'),
+    (a.why || '').replace(/"/g, '""'),
+    a.status || '',
+    a.code || '',
+    new Date(a.ts).toLocaleString('tr-TR')
+  ]);
+  const csvContent = '\uFEFF' + [headers, ...rows].map(e => e.map(x => `"${x}"`).join(';')).join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `DURTU_Basvurular_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast('📥 <b>Başvurular indirildi:</b> CSV/Excel dosyası hazır.');
 }
 function esc(s){ const d = document.createElement('div'); d.textContent = String(s ?? ''); return d.innerHTML; }
 

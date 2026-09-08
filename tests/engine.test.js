@@ -61,7 +61,7 @@ globalThis.setTimeout = () => 0; globalThis.setInterval = () => 0; globalThis.cl
 
 /* ---------- 3) Uygulamayı bu bağlamda çalıştır ---------- */
 const run = new Function('document', 'window', 'localStorage', 'navigator', 'performance', 'requestAnimationFrame', 'cancelAnimationFrame', 'IntersectionObserver', 'MutationObserver', 'fetch', 'AudioContext', 'webkitAudioContext',
-  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null, sha256Sync: typeof sha256Sync !== \"undefined\" ? sha256Sync : null, getProvableCrash: typeof getProvableCrash !== \"undefined\" ? getProvableCrash : null, getProvableMines: typeof getProvableMines !== \"undefined\" ? getProvableMines : null, PF: typeof PF !== \"undefined\" ? PF : null, VIP_TIERS: typeof VIP_TIERS !== \"undefined\" ? VIP_TIERS : null, getVipInfo: typeof getVipInfo !== \"undefined\" ? getVipInfo : null, claimVipChest: typeof claimVipChest !== \"undefined\" ? claimVipChest : null, toggleFavorite: typeof toggleFavorite !== \"undefined\" ? toggleFavorite : null }');
+  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null, sha256Sync: typeof sha256Sync !== \"undefined\" ? sha256Sync : null, getProvableCrash: typeof getProvableCrash !== \"undefined\" ? getProvableCrash : null, getProvableMines: typeof getProvableMines !== \"undefined\" ? getProvableMines : null, PF: typeof PF !== \"undefined\" ? PF : null, VIP_TIERS: typeof VIP_TIERS !== \"undefined\" ? VIP_TIERS : null, getVipInfo: typeof getVipInfo !== \"undefined\" ? getVipInfo : null, claimVipChest: typeof claimVipChest !== \"undefined\" ? claimVipChest : null, toggleFavorite: typeof toggleFavorite !== \"undefined\" ? toggleFavorite : null, submitApply: typeof submitApply !== \"undefined\" ? submitApply : null }');
 let app;
 try {
   app = run(document, window, localStorage, navigator, performance, requestAnimationFrame, cancelAnimationFrame, IntersectionObserver, MutationObserver, fetch, ACStub, ACStub);
@@ -257,6 +257,30 @@ console.log('\n❤️ Lobi Favorileri:');
   T('Birden fazla oyun favorilere eklenebilir', app.state.favorites.length === 2 && app.state.favorites.includes('mines'));
   app.toggleFavorite(null, 'gates');
   T('Aynı oyun tekrar tıklandığında favorilerden çıkarılır', !app.state.favorites.includes('gates') && app.state.favorites.length === 1);
+}
+
+/* ---------- 8.10) Başvuru Formu & E-posta Doğrulaması ---------- */
+console.log('\n📥 Başvuru Formu & E-posta:');
+{
+  localStorage.removeItem('durtu_apps');
+  const nameEl = document.getElementById('apName');
+  const emailEl = document.getElementById('apEmail');
+  const contactEl = document.getElementById('apContact');
+  const whyEl = document.getElementById('apWhy');
+
+  nameEl.value = 'Can Demir';
+  emailEl.value = 'hatali_email'; // geçersiz e-posta
+  whyEl.value = 'Ben sakin bir oyuncuyum ve kapalı kulübü merak ediyorum.';
+  app.submitApply();
+  let apps = JSON.parse(localStorage.getItem('durtu_apps') || '[]');
+  T('Geçersiz e-posta adresiyle başvuru reddedilir', apps.length === 0);
+
+  emailEl.value = 'can.demir@vipclub.com'; // geçerli e-posta
+  contactEl.value = '@candemir';
+  app.submitApply();
+  apps = JSON.parse(localStorage.getItem('durtu_apps') || '[]');
+  T('Geçerli e-posta ile başvuru başarıyla kaydedilir', apps.length === 1);
+  T('Başvuru sahibinin e-postası ve telegramı tam olarak saklanır', apps[0].email === 'can.demir@vipclub.com' && apps[0].contact === '@candemir');
 }
 
 /* ---------- 9) Sonuç ---------- */

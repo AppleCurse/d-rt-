@@ -942,8 +942,12 @@ body.tick footer{padding-bottom:34px}
     <h3>Kayıt değil. Başvuru.</h3>
     <p class="noteline">Her üyelik Dürtü tarafından tek tek değerlendirilir. Acele etme; içtenlikle yaz.</p>
     <div id="applyForm">
-      <label>Adın</label>
-      <input class="inp" id="apName" placeholder="Adınız" autocomplete="off">
+      <label>Adın Soyadın</label>
+      <input class="inp" id="apName" placeholder="Adınız Soyadınız" autocomplete="name">
+      <label>E-posta Adresin (Zorunlu — Davetiyen buraya iletilir)</label>
+      <input class="inp" id="apEmail" type="email" placeholder="ornek@alanadi.com" autocomplete="email">
+      <label>Telegram veya Telefon (VIP Temsilci Hattı — Opsiyonel)</label>
+      <input class="inp" id="apContact" placeholder="@kullaniciadi veya 05XX XXX XX XX" autocomplete="tel">
       <label>Neden DÜRTÜ’ye katılmak istiyorsun? (3 cümle)</label>
       <textarea class="inp" id="apWhy" placeholder="Seni buraya çeken nedir?"></textarea>
       <label>Hangi oyun türünde kendini uzman hissediyorsun?</label>
@@ -1913,20 +1917,41 @@ function openDoor(name, invited){
 }
 
 function submitApply(){
-  const name = $('apName').value.trim() || 'Misafir';
-  const why  = $('apWhy').value.trim();
+  const name = ($('apName') ? $('apName').value.trim() : '') || 'Misafir';
+  const email = ($('apEmail') ? $('apEmail').value.trim() : '');
+  const contact = ($('apContact') ? $('apContact').value.trim() : '');
+  const why  = ($('apWhy') ? $('apWhy').value.trim() : '');
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!email || !emailRegex.test(email)){
+    toast('<b>Dürtü:</b> Geçerli bir e-posta adresi girin — davetiyeniz buraya gönderilecek.');
+    if($('apEmail')) $('apEmail').focus();
+    return;
+  }
   if(why.length < 12){ toast('<b>Dürtü:</b> Üç cümle bekliyoruz — içtenlikle yaz.'); return; }
+
   try{ // → backoffice kuyruğu (admin.html “Başvurular”)
     const apps = JSON.parse(localStorage.getItem('durtu_apps') || '[]');
-    apps.push({ id:'A' + Date.now().toString(36).toUpperCase(), name, why, type: $('apType').value, budget: $('apBudget').value, ts: Date.now(), status:'pending' });
+    apps.push({
+      id: 'A' + Date.now().toString(36).toUpperCase(),
+      name,
+      email,
+      contact,
+      why,
+      type: $('apType') ? $('apType').value : '',
+      budget: $('apBudget') ? $('apBudget').value : '',
+      ts: Date.now(),
+      status: 'pending'
+    });
     localStorage.setItem('durtu_apps', JSON.stringify(apps));
-    cloudApply(name, why);;
+    cloudApply(name, why);
   }catch(e){}
+
   $('applyForm').classList.add('hidden');
   $('applyWait').classList.remove('hidden');
   setTimeout(()=>{ $('applyWaitTxt').textContent = 'Değerlendirme tamamlandı.'; }, 1600);
   setTimeout(()=>{
-    $('applyWaitTxt').innerHTML = `<span class="serif" style="font-size:1.15rem;color:var(--gold)">Onaylandın, ${esc(name)}. Davetiyen hazır.</span>`;
+    $('applyWaitTxt').innerHTML = `<span class="serif" style="font-size:1.15rem;color:var(--gold)">Onaylandın, ${esc(name)}. Davetiyen hazır.</span><br><small class="muted" style="font-size:.72rem;margin-top:.4rem;display:block">Davet mektubunuz <b>${esc(email)}</b> adresine iletildi.</small>`;
     $('applyDone').classList.remove('hidden');
   }, 2500);
 }

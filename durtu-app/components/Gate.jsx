@@ -19,13 +19,20 @@ export default function Gate({ onEnter }) {
     e.preventDefault();
     const fd = new FormData(e.target);
     const name = (fd.get('name') || '').toString().trim() || 'Misafir';
+    const email = (fd.get('email') || '').toString().trim();
+    const contact = (fd.get('contact') || '').toString().trim();
     const why = (fd.get('why') || '').toString().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      say('<b>Dürtü:</b> Geçerli bir e-posta adresi girin — davetiyeniz buraya gönderilecek.');
+      return;
+    }
     if (why.length < 12) { say('<b>Dürtü:</b> Üç cümle bekliyoruz — içtenlikle yaz.'); return; }
     setBusy(true);
     try {
       await fetch('/api/apply', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, why, type: fd.get('type'), budget: fd.get('budget') }),
+        body: JSON.stringify({ name, email, contact, why, type: fd.get('type'), budget: fd.get('budget') }),
       });
     } catch (_) { /* demo: çevrimdışıysa da akış sürsün */ }
     setTimeout(() => { setBusy(false); setApproved(true); }, 2200);
@@ -63,10 +70,14 @@ export default function Gate({ onEnter }) {
             <p className="noteline">Her üyelik Dürtü tarafından tek tek değerlendirilir. Acele etme; içtenlikle yaz.</p>
             {!approved ? (
               <form onSubmit={submitApp}>
-                <label>Adın</label>
-                <input className="inp" name="name" placeholder="Adınız" />
+                <label>Adın Soyadın</label>
+                <input className="inp" name="name" placeholder="Adınız Soyadınız" required />
+                <label>E-posta Adresin (Zorunlu — Davetiyen buraya iletilir)</label>
+                <input className="inp" type="email" name="email" placeholder="ornek@alanadi.com" required />
+                <label>Telegram veya Telefon (VIP Temsilci Hattı — Opsiyonel)</label>
+                <input className="inp" name="contact" placeholder="@kullaniciadi veya 05XX XXX XX XX" />
                 <label>Neden DÜRTÜ'ye katılmak istiyorsun? (3 cümle)</label>
-                <textarea className="inp" name="why" placeholder="Seni buraya çeken nedir?" />
+                <textarea className="inp" name="why" placeholder="Seni buraya çeken nedir?" required />
                 <label>Hangi türde kendini uzman hissediyorsun?</label>
                 <select className="inp" name="type"><option>Slot</option><option>Canlı Bahis</option><option>Masa Oyunları</option><option>Crash</option></select>
                 <label>Aylık oyun bütçen</label>
