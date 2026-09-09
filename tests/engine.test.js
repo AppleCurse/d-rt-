@@ -61,7 +61,7 @@ globalThis.setTimeout = () => 0; globalThis.setInterval = () => 0; globalThis.cl
 
 /* ---------- 3) Uygulamayı bu bağlamda çalıştır ---------- */
 const run = new Function('document', 'window', 'localStorage', 'navigator', 'performance', 'requestAnimationFrame', 'cancelAnimationFrame', 'IntersectionObserver', 'MutationObserver', 'fetch', 'AudioContext', 'webkitAudioContext',
-  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null, sha256Sync: typeof sha256Sync !== \"undefined\" ? sha256Sync : null, getProvableCrash: typeof getProvableCrash !== \"undefined\" ? getProvableCrash : null, getProvableMines: typeof getProvableMines !== \"undefined\" ? getProvableMines : null, PF: typeof PF !== \"undefined\" ? PF : null, VIP_TIERS: typeof VIP_TIERS !== \"undefined\" ? VIP_TIERS : null, getVipInfo: typeof getVipInfo !== \"undefined\" ? getVipInfo : null, claimVipChest: typeof claimVipChest !== \"undefined\" ? claimVipChest : null, toggleFavorite: typeof toggleFavorite !== \"undefined\" ? toggleFavorite : null, submitApply: typeof submitApply !== \"undefined\" ? submitApply : null }');
+  appJs + '; return { state, CR, BJ, ROU, ST: st, crStart, crCash, crQuit, crEnd: (typeof crEnd!=="undefined")?crEnd:null, openCrash, bjTotal: (typeof bjTotal!=="undefined")?bjTotal:null, bjSettle, bjOpen, rouPays, logRound, minesMul: typeof mnMul !== \"undefined\" ? mnMul : null, PROMO_CODES: typeof PROMO_CODES !== \"undefined\" ? PROMO_CODES : null, claimPromoCode: typeof claimPromoCode !== \"undefined\" ? claimPromoCode : null, sha256Sync: typeof sha256Sync !== \"undefined\" ? sha256Sync : null, getProvableCrash: typeof getProvableCrash !== \"undefined\" ? getProvableCrash : null, getProvableMines: typeof getProvableMines !== \"undefined\" ? getProvableMines : null, PF: typeof PF !== \"undefined\" ? PF : null, VIP_TIERS: typeof VIP_TIERS !== \"undefined\" ? VIP_TIERS : null, getVipInfo: typeof getVipInfo !== \"undefined\" ? getVipInfo : null, claimVipChest: typeof claimVipChest !== \"undefined\" ? claimVipChest : null, toggleFavorite: typeof toggleFavorite !== \"undefined\" ? toggleFavorite : null, submitApply: typeof submitApply !== \"undefined\" ? submitApply : null, enterApp: typeof enterApp !== \"undefined\" ? enterApp : null }');
 let app;
 try {
   app = run(document, window, localStorage, navigator, performance, requestAnimationFrame, cancelAnimationFrame, IntersectionObserver, MutationObserver, fetch, ACStub, ACStub);
@@ -281,6 +281,37 @@ console.log('\n📥 Başvuru Formu & E-posta:');
   apps = JSON.parse(localStorage.getItem('durtu_apps') || '[]');
   T('Geçerli e-posta ile başvuru başarıyla kaydedilir', apps.length === 1);
   T('Başvuru sahibinin e-postası ve telegramı tam olarak saklanır', apps[0].email === 'can.demir@vipclub.com' && apps[0].contact === '@candemir');
+}
+
+/* ---------- 8.11) Günlük Giriş / Check-in Bonusu ---------- */
+console.log('\n☀️ Günlük Giriş / Check-in Bonusu:');
+{
+  // 1. Gün: İlk giriş testi
+  localStorage.removeItem('durtu_demo_v1');
+  app.state.entered = false;
+  app.state.chips = 1000;
+  app.enterApp('Emre', false);
+  T('Günün ilk girişinde +100 dürTL günlük ritüel bonusu eklenir', app.state.chips >= 1100);
+  T('İlk gün girişinde seri 1 olarak başlar', app.state.streakDays === 1);
+
+  // Aynı gün tekrar giriş: Çift bonus verilmemeli
+  const chipsAfterFirst = app.state.chips;
+  app.state.entered = false;
+  app.enterApp('Emre', false);
+  T('Aynı gün ikinci girişte mükerrer bonus verilmez', app.state.chips === chipsAfterFirst);
+
+  // 2. Gün: Dün girmiş olan kullanıcının serisi artmalı
+  const yesterday = new Date(Date.now() - 864e5).toDateString();
+  localStorage.setItem('durtu_demo_v1', JSON.stringify({
+    name: 'Emre',
+    chips: 1500,
+    lastDay: yesterday,
+    streakDays: 2
+  }));
+  app.state.entered = false;
+  app.enterApp('Emre', false);
+  T('Dün giriş yapılmışsa seri 1 artar (2 -> 3 gün)', app.state.streakDays === 3);
+  T('Yeni günde +100 dürTL bonus hesaba eklenir', app.state.chips === 1600);
 }
 
 /* ---------- 9) Sonuç ---------- */

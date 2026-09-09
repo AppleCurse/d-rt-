@@ -53,6 +53,7 @@ export default function Gate({ onEnter }) {
           <button className="btn solid" type="submit">Kapıyı Çal</button>
           <button className="btn ghost" type="button" onClick={() => setAppOpen(true)}>Başvuru Yap</button>
           <p className="gate-hint">Demo: 4+ karakterli her kod kapıyı açar — örn. <b style={{ color: 'var(--gold)' }}>EV-2026</b></p>
+          <p className="gate-hint" style={{ marginTop: '.4rem', color: 'var(--gold2)', fontSize: '.68rem' }}>☀️ Günün ilk girişinde +100 dürTL hoş geldin ritüeli kasana eklenir</p>
         </form>
         <p className="gate-foot">İki adımlı doğrulama • Şifreli iletişim • 18+ | Sorumlu oyun</p>
       </section>

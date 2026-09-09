@@ -1,0 +1,6 @@
+{
+  "name": "DÜRTÜ — Kapalı Kulüp",
+  "description": "Küratörlü oyun deneyimi, kişisel salon, Plinko, Rulet, Blackjack, Mines, Limbo, Hi-Lo ve günlük ödül ritüeli demosu",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

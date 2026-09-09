@@ -47,7 +47,21 @@ export default function GameGrid({ onPlay }) {
                 <div className="note">“{x.note}”</div>
                 <div style={{ marginTop: '1rem' }}>
                   <span className="tag" style={{ letterSpacing: '.2em' }}>
-                    {x.type === 'slot' ? 'Oyna →' : x.type === 'crash' ? 'Uç →' : 'Masaya git →'}
+                    {x.type === 'slot'
+                      ? 'Oyna →'
+                      : x.type === 'crash'
+                      ? 'Uç →'
+                      : x.type === 'plinko'
+                      ? 'Bırak →'
+                      : x.type === 'limbo'
+                      ? 'Roketle →'
+                      : x.type === 'hilo'
+                      ? 'Tahmin Et →'
+                      : x.type === 'wheel'
+                      ? 'Çevir →'
+                      : x.type === 'mines'
+                      ? 'Tarlaya Gir →'
+                      : 'Masaya Git →'}
                   </span>
                 </div>
               </div>
